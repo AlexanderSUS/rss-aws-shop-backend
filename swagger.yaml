@@ -1,0 +1,94 @@
+openapi: 3.0.0
+info:
+  title: Products API
+  version: 0.1.9
+servers:
+  # TODO change URL
+  - url: http://api.example.com/
+paths:
+  /products:
+    get:
+      summary: Returns a list of products.
+      tags: 
+        - products
+      description: Optional extended description in CommonMark or HTML.
+      responses:
+        '200':    # status code
+          description: "OK"
+          content:
+            application/json:
+              schema: 
+                type: array 
+                items:
+                  type: object
+                  properties:
+                    id: 
+                      type: string
+                      format: uuid
+                      description: Product id
+                    name:
+                      type: string
+                      description: Product title
+                    price:
+                      type: number
+                      description: Product price
+              example:
+                - id: "1" 
+                  title: "Product 1" 
+                  price: 100 
+                - id: "2" 
+                  title: "Product 2" 
+                  price: 200 
+                - id: "3"
+                  title: "Product 3" 
+                  price: 300 
+
+  /products/{productId}:
+    get:
+      summary: Returns a product by ID.
+      tags: 
+        - products
+      parameters:
+        - name: productId 
+          in: path
+          required: true
+          schema:
+            type : string 
+            format: uuid 
+          example:
+            "1"
+      responses: 
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  id: 
+                    type: string
+                    format: uuid
+                    description: Product id
+                  name:
+                    type: string
+                    description: Product name 
+                  price:
+                    type: number
+                    description: Product price
+              example:
+                id: "1"
+                name: Product 1 
+                price: 1
+        '404':
+          description: Product not found 
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  message: 
+                    type: string
+              example:
+                message: Product not found 
