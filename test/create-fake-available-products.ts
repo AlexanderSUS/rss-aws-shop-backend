@@ -6,7 +6,7 @@ export function createFakeAvailableProducts(length = 10): AvailableProduct[] {
     id: randomUUID(),
     title: `Product ${i}`,
     description:  `Product ${i} description`,
-    price: i * 100 ,
+    price: (i + 1) * 100 ,
     count: i
   }))
 }
