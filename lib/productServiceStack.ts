@@ -69,7 +69,7 @@ export class ProductServiceStack extends cdk.Stack {
     const api = new RestApi(this, 'ShopAPI', {
       defaultCorsPreflightOptions: {
         allowOrigins: Cors.ALL_ORIGINS,
-        allowMethods: ['OPTIONS', 'PUT', 'GET'],
+        allowMethods: ['OPTIONS', 'POST', 'GET'],
       },
     });
 
@@ -79,7 +79,7 @@ export class ProductServiceStack extends cdk.Stack {
     const productWithIdEndpoint = productEndpoint.addResource('{productId}');
     productWithIdEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(getProductByIdFunction))
 
-    productEndpoint.addMethod(HttpMethod.PUT, new LambdaIntegration(createProductFunction));
+    productEndpoint.addMethod(HttpMethod.POST, new LambdaIntegration(createProductFunction));
     
     new cdk.CfnOutput(this, 'RestApiUrl', {
       value: api.url!,
