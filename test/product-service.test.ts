@@ -220,17 +220,17 @@ describe('createProduct', () => {
     ['title is not a string', (p: Partial<CreateProductBody>) => p.title = 5 as unknown as string],
     ['price was not provided', (p: Partial<CreateProductBody>) => delete p.price],
     ['price is not a positive value', (p: Partial<CreateProductBody>) => p.price = -10],
-    ['descriptions is not a string', (p: Partial<CreateProductBody>) => delete p.description],
+    ['descriptions is not a string', (p: Partial<CreateProductBody>) => p.description = null as unknown as string],
     ['count was not provided', (p: Partial<CreateProductBody>) => delete p.count],
     ['count less than 0', (p: Partial<CreateProductBody>) => p.count = -10],
     ['count is not integer number', (p: Partial<CreateProductBody>) => p.count = 1.03],
   ])('should return 400 error if %s', async (condition, mutateFn) => {
     const product = createCreateProductBody()
-    const patchedProduct = mutateFn(product)
+    mutateFn(product)
 
     const res = await createProduct({
         ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
-        body: JSON.stringify(patchedProduct)
+        body: JSON.stringify(product)
     })
 
     expect(res.statusCode).toBe(400)
