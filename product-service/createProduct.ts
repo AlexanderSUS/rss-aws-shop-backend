@@ -4,7 +4,7 @@ import { DynamoDBClient, TransactWriteItemsCommand } from '@aws-sdk/client-dynam
 import { apiBadRequestError, apiCreateResponse, apiInternalServerError } from './response';
 import { clientConfig } from './clientConfig';
 import { CreateProductBody } from './types';
-import Joi = require("joi");
+import * as Joi from 'joi';
 
 export const createProductBodySchema = Joi.object({
   title: Joi.string().required(),
