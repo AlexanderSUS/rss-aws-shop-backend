@@ -8,7 +8,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "docker compose up -d && (DB_HOST=http://localhost:8000 PRODUCT_TABLE_NAME=product STOCK_TABLE_NAME=stock jest --verbose; docker compose down)",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "fill:tables": "ts-node ./test/fill-tables.ts"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.140",
