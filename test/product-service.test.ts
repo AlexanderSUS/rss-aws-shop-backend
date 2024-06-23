@@ -17,7 +17,7 @@ import { clientConfig } from '../product-service/clientConfig';
 const PRODUCTS_LENGTH = 10;
 
 const client = new DynamoDBClient({
-  endpoint: process.env.DB_HOST,
+  endpoint: process.env.LOCAL_DB_HOST,
   region: 'us-east-1'
 });
 

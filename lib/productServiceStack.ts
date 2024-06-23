@@ -17,6 +17,7 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
+        LOCAL_DB_HOST: 'http://localhost:8000',
       }
     }); 
 
@@ -27,16 +28,18 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
+        LOCAL_DB_HOST: 'http://localhost:8000',
       },
     }); 
 
     const createProductFunction = new lambda.Function(this, 'CreateProductFunction', {
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset('product-service'),
+      code: lambda.Code.fromAsset('./product-service'),
       handler: 'createProduct.handler',
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
+        LOCAL_DB_HOST: 'http://localhost:8000',
       },
     }); 
 
