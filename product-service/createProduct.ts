@@ -8,9 +8,9 @@ import Joi = require("joi");
 
 export const createProductBodySchema = Joi.object({
   title: Joi.string().required(),
-  price: Joi.number().positive(),
+  price: Joi.number().positive().required(),
   description: Joi.string().default(""),
-  count: Joi.number().integer().min(0),
+  count: Joi.number().integer().min(0).required(),
 })
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
