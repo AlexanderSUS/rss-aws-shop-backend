@@ -1,6 +1,5 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
-import { ProductServiceTable } from "./enums";
 import { apiBadRequestError, apiInternalServerError, apiNotFoundError, apiSuccessResponse } from "./response";
 import { clientConfig } from "./clientConfig";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
@@ -10,6 +9,13 @@ type PathParams = { pathParameters: { productId?: string }}
 export type APIGatewayEventWithPathParams = APIGatewayEvent & PathParams;
 
 export const handler = async (event:  APIGatewayEventWithPathParams): Promise<APIGatewayProxyResult> => {
+  const STOCK_TABLE_NAME = process.env.STOCK_TABLE_NAME;
+  const PRODUCT_TABLE_NAME = process.env.PRODUCT_TABLE_NAME;
+
+  if (!STOCK_TABLE_NAME || !PRODUCT_TABLE_NAME) {
+    return apiInternalServerError();
+  }
+
   const { productId } = event.pathParameters;
 
   if (!productId || !productId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
@@ -20,7 +26,7 @@ export const handler = async (event:  APIGatewayEventWithPathParams): Promise<AP
 
   try {
     const command = new QueryCommand({
-      TableName: ProductServiceTable.product,
+      TableName: PRODUCT_TABLE_NAME,
       KeyConditionExpression: "id = :id",
       ExpressionAttributeValues: {
         ":id": {
@@ -38,7 +44,7 @@ export const handler = async (event:  APIGatewayEventWithPathParams): Promise<AP
     const product = unmarshall(Items[0]);
 
     const getStockItemCommand = new QueryCommand({
-      TableName: ProductServiceTable.stock,
+      TableName: STOCK_TABLE_NAME,
       KeyConditionExpression: "product_id = :id",
       ExpressionAttributeValues: {
         ":id": {

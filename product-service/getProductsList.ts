@@ -1,5 +1,4 @@
 import { BatchGetItemCommand, DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
-import { ProductServiceTable } from "./enums";
 import { apiInternalServerError, apiSuccessResponse } from "./response";
 import { APIGatewayProxyResult } from "aws-lambda";
 import { clientConfig } from "./clientConfig";
@@ -7,11 +6,18 @@ import { AvailableProduct, Product, StockItem } from "./types";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 export const handler = async (): Promise<APIGatewayProxyResult>=> {
+  const STOCK_TABLE_NAME = process.env.STOCK_TABLE_NAME;
+  const PRODUCT_TABLE_NAME = process.env.PRODUCT_TABLE_NAME;
+
+  if (!STOCK_TABLE_NAME || !PRODUCT_TABLE_NAME) {
+    return apiInternalServerError();
+  }
+
   try {
     const client = new DynamoDBClient(clientConfig);
-    const command = new ScanCommand({ TableName: ProductServiceTable.product })
+    const getProductsListCommand = new ScanCommand({ TableName: PRODUCT_TABLE_NAME })
 
-    const response = await client.send(command);
+    const response = await client.send(getProductsListCommand);
 
     if(!response.Items) {
       return apiInternalServerError();
@@ -25,7 +31,7 @@ export const handler = async (): Promise<APIGatewayProxyResult>=> {
     const stockItemsKeys = productsList.map(({ id: product_id }) => ({ product_id: { S: product_id }}));
 
     const getStockItemCommand = new BatchGetItemCommand({
-      RequestItems: { [`${ProductServiceTable.stock}`]: { Keys: stockItemsKeys, } }
+      RequestItems: { [`${STOCK_TABLE_NAME}`]: { Keys: stockItemsKeys, } }
     })
 
     const stockRes = await client.send(getStockItemCommand);

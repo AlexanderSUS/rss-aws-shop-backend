@@ -1,7 +1,6 @@
 import { randomUUID } from 'crypto';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { DynamoDBClient, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
-import { ProductServiceTable } from './enums';
 import { apiBadRequestError, apiCreateResponse, apiInternalServerError } from './response';
 import { clientConfig } from './clientConfig';
 import { CreateProductBody } from './types';
@@ -15,6 +14,13 @@ export const createProductBodySchema = Joi.object({
 })
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const STOCK_TABLE_NAME = process.env.STOCK_TABLE_NAME;
+  const PRODUCT_TABLE_NAME = process.env.PRODUCT_TABLE_NAME;
+
+  if (!STOCK_TABLE_NAME || !PRODUCT_TABLE_NAME) {
+    return apiInternalServerError();
+  }
+
   if (!event.body) return apiBadRequestError('Body was not provided');
 
   const body = JSON.parse(event.body) as CreateProductBody;
@@ -30,7 +36,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   const productId =  randomUUID();
 
   const putProductData = {
-    TableName: ProductServiceTable.product,
+    TableName: PRODUCT_TABLE_NAME,
     Item: {
       id: { S: productId },
       title: { S: title },
@@ -40,7 +46,7 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   };   
 
   const putStockData = {
-    TableName: ProductServiceTable.stock,
+    TableName: STOCK_TABLE_NAME,
     Item: {
       product_id: { S: productId },
       count: { N: count?.toString() || '0' }

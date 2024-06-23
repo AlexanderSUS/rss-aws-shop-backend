@@ -14,18 +14,30 @@ export class ProductServiceStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_20_X,
       code: lambda.Code.fromAsset('./product-service'),
       handler: 'getProductsList.handler',
+      environment: {
+        STOCK_TABLE_NAME: ProductServiceTable.stock,
+        PRODUCT_TABLE_NAME: ProductServiceTable.product,
+      }
     }); 
 
     const getProductByIdFunction = new lambda.Function(this, 'GetProductByIdFunction', {
       runtime: lambda.Runtime.NODEJS_20_X,
       code: lambda.Code.fromAsset('./product-service'),
       handler: 'getProductById.handler',
+      environment: {
+        STOCK_TABLE_NAME: ProductServiceTable.stock,
+        PRODUCT_TABLE_NAME: ProductServiceTable.product,
+      },
     }); 
 
     const createProductFunction = new lambda.Function(this, 'CreateProductFunction', {
       runtime: lambda.Runtime.NODEJS_20_X,
       code: lambda.Code.fromAsset('product-service'),
       handler: 'createProduct.handler',
+      environment: {
+        STOCK_TABLE_NAME: ProductServiceTable.stock,
+        PRODUCT_TABLE_NAME: ProductServiceTable.product,
+      },
     }); 
 
     const productTable = new Table(this, "Product", {
