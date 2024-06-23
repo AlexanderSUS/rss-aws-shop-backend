@@ -1,74 +1,228 @@
 import { APIGatewayEvent } from 'aws-lambda';
-import { handler as getProductsById } from '../product-service/getProductsById'
-import { handler as getProductList } from '../product-service/getProductsList'
+import { handler as getProductById } from '../product-service/getProductById';
+import { handler as getProductList } from '../product-service/getProductsList';
+import { handler as createProduct } from '../product-service/createProduct';
 import { mockApiGatewayEvent } from './mock-api-gateway-event';
+import { createStockTable } from './create-stock-table';
+import { createProductTable } from './create-product-table';
+import { DeleteTableCommand, DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import { seedProducts } from './seed-products';
+import { AvailableProduct, Product } from '../product-service/types';
+import { randomUUID } from 'crypto';
+import { createCreateProductBody } from './create-create-product-body';
+import { ProductServiceTable } from '../product-service/enums';
+import { headers } from '../product-service/response';
+import { clientConfig } from '../product-service/clientConfig';
 
-const MOCKED_PRODUCTS_LENGTH = 3;
+const PRODUCTS_LENGTH = 10;
 
-const TEST_PRODUCT = {
-  id: '1',
-  name: 'Product 1',
-  price: 100,
-}
+const client = new DynamoDBClient({
+  endpoint: process.env.DB_HOST,
+  region: 'us-east-1'
+});
 
-describe('getProductsById', () => {
+beforeEach(async () => {
+  await createProductTable(client);
+  await createStockTable(client);
+});
+
+afterEach(async () => {
+  jest.restoreAllMocks();
+
+  await client.send(new DeleteTableCommand({
+    TableName: ProductServiceTable.product
+  }))
+
+  await client.send(new DeleteTableCommand({
+    TableName: ProductServiceTable.stock
+  }))
+})
+
+ describe('getProductById', () => {
+  let products: AvailableProduct[];
+
+  beforeEach(async () => {
+    [products] = await seedProducts(client);
+  })
+
   test('should return 200 status code on existent id', async() => {
-    const res = await getProductsById(
+    const res = await getProductById(
     {
         ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
-        pathParameters: { id: TEST_PRODUCT.id} 
+        pathParameters: { productId: products[0].id} 
       }, 
     );
 
     expect(res.statusCode).toBe(200);
-    expect(res.headers).toEqual({ "Content-Type": "application/json" });
-
-    const body = JSON.parse(res.body);
-    expect(body).toEqual(TEST_PRODUCT)
+    expect(res.headers).toEqual(headers);
   })
 
   test('should return proper product object', async () => {
-    const res = await getProductsById(
+    const [expectedProduct] = products;
+
+    const res = await getProductById(
     {
         ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
-        pathParameters: { id: TEST_PRODUCT.id} 
+        pathParameters: { productId: expectedProduct.id } 
       }, 
     );
 
-    const body = JSON.parse(res.body);
-    expect(body).toHaveProperty('id', TEST_PRODUCT.id);
-    expect(body).toHaveProperty('name', TEST_PRODUCT.name);
-    expect(body).toHaveProperty('price', TEST_PRODUCT.price);
+    const product = JSON.parse(res.body);
+
+    expect(Object.keys(product)).toHaveLength(5)
+
+    expect(product).toHaveProperty('id', expectedProduct.id);
+    expect(product).toHaveProperty('title', expectedProduct.title);
+    expect(product).toHaveProperty('description', expectedProduct.description);
+    expect(product).toHaveProperty('price', expectedProduct.price);
+    expect(product).toHaveProperty('count', expectedProduct.count)
   });
 
   test('should return 404 status code if product not found', async() => {
-    const res = await getProductsById(
+    const res = await getProductById(
     {
         ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
-        pathParameters: { id: '5' } 
+        pathParameters: { productId: randomUUID() } 
       }, 
     );
 
     const body = JSON.parse(res.body);
 
     expect(res.statusCode).toBe(404);
-    expect(res.headers).toEqual({ "Content-Type": "application/json" });
+    expect(res.headers).toEqual(headers);
     expect(body).toHaveProperty('message', 'Product not found');
+  });
+
+
+  // TODO check with empty database
+  test('should return 400 status code on invalid id', async() => {
+    const res = await getProductById({
+        ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
+        pathParameters: { productId: 'foo'} 
+      }, 
+    );
+
+    const body = JSON.parse(res.body);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.headers).toEqual(headers);
+    expect(body).toHaveProperty('message', 'Invalid product id');
+  })
+
+  test('should return 500 statusCode if database connection is broken', async () => {
+    jest.replaceProperty(clientConfig, 'endpoint', undefined)
+    
+    const res = await getProductById({
+        ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
+        pathParameters: { productId: 'ad6c058b-749a-4ddc-93cf-15b262efd2a2'} 
+      }, 
+    );
+
+    expect(res.statusCode).toBe(500);
   })
 })
 
 describe('getProductsList', () => {
   test('should return 200 status code on success response', async () => {
-    const res = await getProductList(mockApiGatewayEvent as unknown as APIGatewayEvent);
+    await seedProducts(client);
+
+    const res = await getProductList();
 
     expect(res.statusCode).toBe(200);
   });
 
   test('should return list of products on success response', async () => {
-    const res = await getProductList(mockApiGatewayEvent as unknown as APIGatewayEvent);
+    await seedProducts(client);
+
+    const res = await getProductList();
 
     const products = JSON.parse(res.body);
 
-    expect(products).toHaveLength(MOCKED_PRODUCTS_LENGTH);
+    expect(products).toHaveLength(PRODUCTS_LENGTH);
   });
+
+  test('should return products with proper fields', async () => {
+    const [[expectedProduct]] = await seedProducts(client);
+
+    const res = await getProductList();
+
+    const [item] = JSON.parse(res.body);
+
+    expect(Object.keys(item)).toHaveLength(5)
+    expect(item).toHaveProperty('id');
+    expect(item).toHaveProperty('title');
+    expect(item).toHaveProperty('description');
+    expect(item).toHaveProperty('price');
+    expect(item).toHaveProperty('count');
+  });
+
+  test('should return empty array if there are no products', async () => {
+    const res = await getProductList();
+
+    const products = JSON.parse(res.body);
+
+    expect(products).toHaveLength(0);
+  });
+
+  test('should return 500 statusCode if database connection is broken', async () => {
+    jest.replaceProperty(clientConfig, 'endpoint', undefined)
+    
+    const res = await getProductList(); 
+
+    expect(res.statusCode).toBe(500);
+  })
+})
+
+describe('createProduct', () => {
+  test('should return 201 status code on success', async () => {
+    const res = await createProduct({
+        ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
+        body: JSON.stringify(createCreateProductBody())
+    })
+
+    expect(res.statusCode).toBe(201)
+  });
+
+  test(`should create item in ${ProductServiceTable.product} table`, async () => {
+    await createProduct({
+        ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
+        body: JSON.stringify(createCreateProductBody())
+    })
+
+    const command = new ScanCommand({
+      TableName: ProductServiceTable.product,
+    });
+
+    const response = await client.send(command);
+
+    expect(response.Count).toBe(1);
+    expect(response.Items).toHaveLength(1)
+  })
+
+  test(`should create item in ${ProductServiceTable.stock} table`, async () => {
+    await createProduct({
+        ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
+        body: JSON.stringify(createCreateProductBody())
+    })
+
+    const command = new ScanCommand({
+      TableName: ProductServiceTable.stock,
+    });
+
+    const response = await client.send(command);
+
+    expect(response.Count).toBe(1);
+    expect(response.Items).toHaveLength(1)
+  })
+
+  test('should return 500 statusCode if database connection is broken', async () => {
+    jest.replaceProperty(clientConfig, 'endpoint', undefined)
+    
+    const res = await createProduct({
+        ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
+        body: JSON.stringify(createCreateProductBody())
+    })
+
+    expect(res.statusCode).toBe(500);
+  })
 })

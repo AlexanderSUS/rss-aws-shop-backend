@@ -20,7 +20,7 @@ describe('ProductService stack test', () => {
 
   test('Stack has getProductsById lambda', () => {
     productServiceStackTemplate.hasResourceProperties('AWS::Lambda::Function', {
-      Handler: 'getProductsById.handler',
+      Handler: 'getProductById.handler',
     });
   })
 
@@ -43,11 +43,5 @@ describe('ProductService stack test', () => {
         Ref: Match.stringLikeRegexp("ShopAPI") 
       })
     })
-  })
-
-  test.only('foo', () => {
-    const lambda = productServiceStackTemplate.findResources('AWS::Lambda::Function')
-
-    console.log(lambda)
   })
 })
