@@ -1,4 +1,6 @@
-# installation 
+# rss-aws-shop-backend
+
+## installation 
 
 Before deploy you should instal aws cli and aws-cdk on you computer
 
@@ -6,10 +8,6 @@ install dependencies
 ```bash
 npm install
 ```
-
-# Welcome to your CDK TypeScript project
-
-This is a blank project for CDK development with TypeScript.
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
@@ -21,3 +19,12 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 * `npx cdk deploy`  deploy this stack to your default AWS account/region
 * `npx cdk diff`    compare deployed stack with current state
 * `npx cdk synth`   emits the synthesized CloudFormation template
+
+## Test
+To run tests you should install docker on you computer
+as tests are require dynamodb-local
+
+to run test execute
+```bash
+npm run test
+```
