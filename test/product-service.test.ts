@@ -126,7 +126,7 @@ describe('getProductsList', () => {
   test('should return 200 status code on success response', async () => {
     await seedProducts(client);
 
-    const res = await getProductList();
+    const res = await getProductList({} as unknown as APIGatewayEvent);
 
     expect(res.statusCode).toBe(200);
   });
@@ -134,7 +134,7 @@ describe('getProductsList', () => {
   test('should return list of products on success response', async () => {
     await seedProducts(client);
 
-    const res = await getProductList();
+    const res = await getProductList({} as unknown as APIGatewayEvent);
 
     const products = JSON.parse(res.body);
 
@@ -142,9 +142,9 @@ describe('getProductsList', () => {
   });
 
   test('should return products with proper fields', async () => {
-    const [[expectedProduct]] = await seedProducts(client);
+    await seedProducts(client);
 
-    const res = await getProductList();
+    const res = await getProductList({} as unknown as APIGatewayEvent);
 
     const [item] = JSON.parse(res.body);
 
@@ -157,7 +157,7 @@ describe('getProductsList', () => {
   });
 
   test('should return empty array if there are no products', async () => {
-    const res = await getProductList();
+    const res = await getProductList({} as unknown as APIGatewayEvent);
 
     const products = JSON.parse(res.body);
 
@@ -167,7 +167,7 @@ describe('getProductsList', () => {
   test('should return 500 statusCode if database connection is broken', async () => {
     jest.replaceProperty(clientConfig, 'endpoint', undefined)
     
-    const res = await getProductList(); 
+    const res = await getProductList({} as unknown as APIGatewayEvent);
 
     expect(res.statusCode).toBe(500);
   })

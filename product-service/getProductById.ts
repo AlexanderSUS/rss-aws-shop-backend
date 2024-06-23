@@ -9,6 +9,8 @@ type PathParams = { pathParameters: { productId?: string }}
 export type APIGatewayEventWithPathParams = APIGatewayEvent & PathParams;
 
 export const handler = async (event:  APIGatewayEventWithPathParams): Promise<APIGatewayProxyResult> => {
+  console.log(event);
+
   const STOCK_TABLE_NAME = process.env.STOCK_TABLE_NAME;
   const PRODUCT_TABLE_NAME = process.env.PRODUCT_TABLE_NAME;
 

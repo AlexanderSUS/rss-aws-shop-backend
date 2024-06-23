@@ -14,6 +14,8 @@ export const createProductBodySchema = Joi.object({
 })
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  console.log(event);
+
   const STOCK_TABLE_NAME = process.env.STOCK_TABLE_NAME;
   const PRODUCT_TABLE_NAME = process.env.PRODUCT_TABLE_NAME;
 
