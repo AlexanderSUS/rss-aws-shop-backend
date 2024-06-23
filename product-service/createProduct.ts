@@ -5,15 +5,27 @@ import { ProductServiceTable } from './enums';
 import { apiBadRequestError, apiCreateResponse, apiInternalServerError } from './response';
 import { clientConfig } from './clientConfig';
 import { CreateProductBody } from './types';
+import Joi = require("joi");
+
+export const createProductBodySchema = Joi.object({
+  title: Joi.string().required(),
+  price: Joi.number().positive(),
+  description: Joi.string().default(""),
+  count: Joi.number().integer().min(0),
+})
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  if (!event.body) return apiBadRequestError();
+  if (!event.body) return apiBadRequestError('Body was not provided');
 
-  const { count, title, price, description } = JSON.parse(event.body) as CreateProductBody;
+  const body = JSON.parse(event.body) as CreateProductBody;
 
-  if (!title) return apiBadRequestError();
-  if (!price) return apiBadRequestError();
+  const validationRes = createProductBodySchema.validate(body)
 
+  if ('error' in validationRes) {
+    return apiBadRequestError(validationRes.error?.message)
+  }
+
+  const { count, title, price, description } = body as CreateProductBody;
   const client = new DynamoDBClient(clientConfig);
   const productId =  randomUUID();
 

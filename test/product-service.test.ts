@@ -7,7 +7,7 @@ import { createStockTable } from './create-stock-table';
 import { createProductTable } from './create-product-table';
 import { DeleteTableCommand, DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { seedProducts } from './seed-products';
-import { AvailableProduct, Product } from '../product-service/types';
+import { AvailableProduct, CreateProductBody } from '../product-service/types';
 import { randomUUID } from 'crypto';
 import { createCreateProductBody } from './create-create-product-body';
 import { ProductServiceTable } from '../product-service/enums';
@@ -213,6 +213,27 @@ describe('createProduct', () => {
 
     expect(response.Count).toBe(1);
     expect(response.Items).toHaveLength(1)
+  })
+
+  test.each([
+    ['title was not provided', (p: Partial<CreateProductBody>) => delete p.title],
+    ['title is not a string', (p: Partial<CreateProductBody>) => p.title = 5 as unknown as string],
+    ['price was not provided', (p: Partial<CreateProductBody>) => delete p.price],
+    ['price is not a positive value', (p: Partial<CreateProductBody>) => p.price = -10],
+    ['descriptions is not a string', (p: Partial<CreateProductBody>) => delete p.description],
+    ['count was not provided', (p: Partial<CreateProductBody>) => delete p.count],
+    ['count less than 0', (p: Partial<CreateProductBody>) => p.count = -10],
+    ['count is not integer number', (p: Partial<CreateProductBody>) => p.count = 1.03],
+  ])('should return 400 error if %s', async (condition, mutateFn) => {
+    const product = createCreateProductBody()
+    const patchedProduct = mutateFn(product)
+
+    const res = await createProduct({
+        ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
+        body: JSON.stringify(patchedProduct)
+    })
+
+    expect(res.statusCode).toBe(400)
   })
 
   test('should return 500 statusCode if database connection is broken', async () => {
