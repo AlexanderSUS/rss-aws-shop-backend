@@ -18,7 +18,7 @@ export const handler = async (event:  APIGatewayEventWithPathParams): Promise<AP
     return apiInternalServerError();
   }
 
-  const { productId } = event.pathParameters;
+  const productId = event.pathParameters?.productId;
 
   if (!productId || !productId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
     return apiBadRequestError('Invalid product id')

@@ -1,5 +1,5 @@
 import { APIGatewayEvent } from 'aws-lambda';
-import { handler as getProductById } from '../product-service/getProductById';
+import { APIGatewayEventWithPathParams, handler as getProductById } from '../product-service/getProductById';
 import { handler as getProductList } from '../product-service/getProductsList';
 import { handler as createProduct } from '../product-service/createProduct';
 import { mockApiGatewayEvent } from './mock-api-gateway-event';
@@ -94,7 +94,6 @@ afterEach(async () => {
   });
 
 
-  // TODO check with empty database
   test('should return 400 status code on invalid id', async() => {
     const res = await getProductById({
         ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
@@ -108,6 +107,20 @@ afterEach(async () => {
     expect(res.headers).toEqual(headers);
     expect(body).toHaveProperty('message', 'Invalid product id');
   })
+
+  test.only('should return 400 status code if id was not provided', async() => {
+    const res = await getProductById(
+        mockApiGatewayEvent as unknown as  APIGatewayEventWithPathParams
+    );
+
+    const body = JSON.parse(res.body);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.headers).toEqual(headers);
+    expect(body).toHaveProperty('message', 'Invalid product id');
+  })
+
+
 
   test('should return 500 statusCode if database connection is broken', async () => {
     jest.replaceProperty(clientConfig, 'endpoint', undefined)
@@ -213,6 +226,15 @@ describe('createProduct', () => {
 
     expect(response.Count).toBe(1);
     expect(response.Items).toHaveLength(1)
+  })
+
+  test('should return 400 error if body is null', async () => {
+    const res = await createProduct({
+      ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
+      body: null 
+    })
+
+    expect(res.statusCode).toBe(400)
   })
 
   test.each([
