@@ -12,5 +12,3 @@ docker
 .DS_Store
 
 .aws-sam
-
-sam-test

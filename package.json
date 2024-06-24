@@ -9,7 +9,8 @@
     "watch": "tsc -w",
     "test": "docker compose up -d && (LOCAL_DB_HOST=http://localhost:8000 PRODUCT_TABLE_NAME=product STOCK_TABLE_NAME=stock jest --verbose; docker compose down)",
     "cdk": "cdk",
-    "fill:tables": "ts-node ./test/fill-tables.ts"
+    "fill:tables": "ts-node ./test/fill-tables.ts",
+    "sam:test": "./sam-test/test.sh"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.140",
