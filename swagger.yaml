@@ -13,7 +13,7 @@ paths:
         - products
       description: Optional extended description in CommonMark or HTML.
       responses:
-        '200':    # status code
+        '200':
           description: "OK"
           content:
             application/json:
@@ -49,10 +49,10 @@ paths:
               schema: 
                 type: object
                 properties:
-                  message: 
+                  id: 
                     type: string 
               example:
-                message: Success
+                id: 6c81a41b-c4b5-46a8-9615-9b4fe9ddfa01
         '400':
           description: Bad request 
           content:
