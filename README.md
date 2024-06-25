@@ -6,7 +6,7 @@ Before deploy you should instal aws cli and aws-cdk on you computer
 
 install dependencies
 ```bash
-npm install
+npm install && (cd product-service && npm install)
 ```
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
