@@ -7,12 +7,11 @@ cdk synth
 sam build -t ./cdk.out/ProductServiceStack.template.json
 
 rm ./{test,product-service,lib}/*.{d.ts,js}
-rm ./product-service/create-product/*.{d.ts,js}
 
 docker compose up -d
 
 LOCAL_DB_HOST=http://localhost:8000 ts-node ./test/create-tables.ts
-LOCAL_DB_HOST=http://localhost:8000 npm run fill:tables | grep id | head -1
+LOCAL_DB_HOST=http://localhost:8000 npm run fill:tables
 
 sam local invoke -t .aws-sam/build/template.yaml GetProductsListFunction \
  --docker-network rss-aws-shop-backend_default --env-vars ./sam-test/env.json
