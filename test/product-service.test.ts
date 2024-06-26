@@ -108,7 +108,7 @@ afterEach(async () => {
     expect(body).toHaveProperty('message', 'Invalid product id');
   })
 
-  test.only('should return 400 status code if id was not provided', async() => {
+  test('should return 400 status code if id was not provided', async() => {
     const res = await getProductById(
         mockApiGatewayEvent as unknown as  APIGatewayEventWithPathParams
     );
