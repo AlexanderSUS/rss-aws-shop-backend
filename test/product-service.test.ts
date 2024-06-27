@@ -18,7 +18,7 @@ const PRODUCTS_LENGTH = 10;
 
 const client = new DynamoDBClient({
   endpoint: process.env.LOCAL_DB_HOST,
-  region: 'us-east-1'
+  region: process.env.AWS_REGION, 
 });
 
 beforeEach(async () => {
@@ -194,6 +194,19 @@ describe('createProduct', () => {
     })
 
     expect(res.statusCode).toBe(201)
+  });
+
+  test('should return id of newly created record', async () => {
+    const res = await createProduct({
+      ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
+      body: JSON.stringify(createCreateProductBody())
+    });
+
+    const body = JSON.parse(res.body) as { id: string }
+
+    expect(body).toHaveProperty('id');
+    expect(typeof body.id === 'string').toBeTruthy();
+    expect(body.id.length).toBe(36)
   });
 
   test(`should create item in ${ProductServiceTable.product} table`, async () => {

@@ -68,5 +68,5 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return apiInternalServerError()
   }
 
-  return apiCreateResponse();
+  return apiCreateResponse({ id: productId });
 }
