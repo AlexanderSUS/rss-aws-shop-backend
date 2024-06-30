@@ -5,7 +5,7 @@ import { clientConfig } from "../product-service/clientConfig";
 (async () => {
   const client = new DynamoDBClient(clientConfig);
 
-  const result = await seedProducts(client)
+  const [productsResult] = await seedProducts(client)
 
-  console.log(result);
+  console.log(JSON.stringify(productsResult, null, 2));
 })();

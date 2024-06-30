@@ -4,6 +4,8 @@ import { apiBadRequestError, apiInternalServerError, apiNotFoundError, apiSucces
 import { clientConfig } from "./clientConfig";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
+// TODO USE DynamoDocumentDbClient
+
 type PathParams = { pathParameters: { productId?: string }}
 
 export type APIGatewayEventWithPathParams = APIGatewayEvent & PathParams;

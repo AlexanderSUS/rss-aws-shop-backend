@@ -14,11 +14,11 @@ export function apiSuccessResponse(payload?: Record<string, any>) {
   }
 }
 
-export function apiCreateResponse() {
+export function apiCreateResponse(body: Record<string, any>) {
   return {
     statusCode: 201,
     headers,
-    body: JSON.stringify({ message: 'Success' })
+    body: JSON.stringify(body)
   }
 }
 

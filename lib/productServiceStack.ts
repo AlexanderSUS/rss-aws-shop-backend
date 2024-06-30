@@ -85,7 +85,7 @@ export class ProductServiceStack extends cdk.Stack {
     productEndpoint.addMethod(HttpMethod.POST, new LambdaIntegration(createProductFunction));
     
     new cdk.CfnOutput(this, 'RestApiUrl', {
-      value: api.url!,
+      value: api.url,
     });
   }
 }
