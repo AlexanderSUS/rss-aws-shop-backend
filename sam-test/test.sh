@@ -49,8 +49,6 @@ sam build -t ./cdk.out/ImportServiceStack.template.json
 echo -e "${YELLOW}ImportProdutsFileFunction GET 200${NC}" 
 sam local invoke -t .aws-sam/build/template.yaml ImportProductsFile -e ./sam-test/GetImportEvnet.json | tail -n 1 | jq '.'
 
+## TODO doesn't work in local environment without s3 
 # echo -e "${YELLOW}ImportFileParserFunction GET 200${NC}" 
 # sam local invoke -t .aws-sam/build/template.yaml ImportFileParser -e ./sam-test/s3PutEvent.json
-
-
-# ./node_modules/.bin/jest ./test/import-service.test.ts 
