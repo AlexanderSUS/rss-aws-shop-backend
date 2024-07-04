@@ -46,7 +46,7 @@ export class ProductServiceStack extends cdk.Stack {
     const productTable = new Table(this, "Product", {
       tableName: ProductServiceTable.product,
       partitionKey: {
-        name: id,
+        name: 'id',
         type: AttributeType.STRING,
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
@@ -65,16 +65,13 @@ export class ProductServiceStack extends cdk.Stack {
 
     productTable.grantReadData(getProductsListFunction);
     productTable.grantReadData(getProductByIdFunction);
-
     productTable.grantReadWriteData(createProductFunction);
+
+    stockTable.grantReadData(getProductsListFunction);
+    stockTable.grantReadData(getProductByIdFunction);
     stockTable.grantReadWriteData(createProductFunction);
     
-    const api = new RestApi(this, 'ShopAPI', {
-      defaultCorsPreflightOptions: {
-        allowOrigins: Cors.ALL_ORIGINS,
-        allowMethods: ['OPTIONS', 'POST', 'GET'],
-      },
-    });
+    const api = new RestApi(this, 'ShopAPI');
 
     const productEndpoint = api.root.addResource(ProductEndpoints.products);
     productEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(getProductsListFunction));
@@ -83,9 +80,5 @@ export class ProductServiceStack extends cdk.Stack {
     productWithIdEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(getProductByIdFunction))
 
     productEndpoint.addMethod(HttpMethod.POST, new LambdaIntegration(createProductFunction));
-    
-    new cdk.CfnOutput(this, 'RestApiUrl', {
-      value: api.url,
-    });
   }
 }
