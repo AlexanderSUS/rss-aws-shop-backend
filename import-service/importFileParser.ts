@@ -7,10 +7,6 @@ export const handler = async (event: S3Event): Promise<any> => {
   const bucket = event.Records[0].s3.bucket.arn;
   const key = event.Records[0].s3.object.key;
 
-  if (!process.env.AWS_REGION) {
-    return console.log('AWS_REGION id undefined')
-  }
-
   const client = new S3({}) as NodeJsClient<S3Client>
   const params = { Bucket: bucket, Key: key };
 

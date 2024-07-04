@@ -18,7 +18,6 @@ const PRODUCTS_LENGTH = 10;
 
 const client = new DynamoDBClient({
   endpoint: process.env.LOCAL_DB_HOST,
-  region: process.env.AWS_REGION, 
 });
 
 beforeEach(async () => {

@@ -17,7 +17,6 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
-        LOCAL_DB_HOST: 'http://localhost:8000',
       }
     }); 
 
@@ -28,7 +27,6 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
-        LOCAL_DB_HOST: 'http://localhost:8000',
       },
     }); 
 
@@ -39,7 +37,6 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
-        LOCAL_DB_HOST: 'http://localhost:8000',
       },
     }); 
 
