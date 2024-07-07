@@ -1,13 +1,15 @@
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import { Cors, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { HttpMethod } from 'aws-cdk-lib/aws-events';
-import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
+import { Bucket, EventType, HttpMethods } from 'aws-cdk-lib/aws-s3';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { CfnOutput, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { S3EventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 
 export class ImportServiceStack extends Stack {
+  public readonly importFileParserFunction: lambda.Function;
+
   constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
 
@@ -15,6 +17,12 @@ export class ImportServiceStack extends Stack {
       autoDeleteObjects: true,
       removalPolicy: RemovalPolicy.DESTROY,
       versioned: false, 
+      cors:  [{
+        allowedMethods: [HttpMethods.PUT],
+        allowedOrigins: ['*'],
+        allowedHeaders: ['*'],
+        exposedHeaders: ['*'],
+      }]
     })
 
     const importProductsFileFunction = new lambda.Function(this, 'ImportProductsFile', {
@@ -32,31 +40,24 @@ export class ImportServiceStack extends Stack {
       handler: 'importFileParser.handler',
     });
 
+    importFileParserFunction.addToRolePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        actions: [ 's3:GetObject', 's3:DeleteObject', 's3:CopyObject' ],
+        resources: [uploadsBucket.bucketArn],
+      }),
+    )
+
     importFileParserFunction.addEventSource(new S3EventSource(uploadsBucket, {
       events: [EventType.OBJECT_CREATED],
       filters: [{ prefix: 'uploaded/' }]
     }));
 
-    importFileParserFunction.addToRolePolicy(
-      new PolicyStatement({
-        effect: Effect.ALLOW,
-        actions: [ 's3:*'],
-        resources: [uploadsBucket.bucketArn],
-      })
-    )
+    this.importFileParserFunction = importFileParserFunction;
 
-    const api = new RestApi(this, 'ImportApi', {
-      defaultCorsPreflightOptions: {
-        allowOrigins: Cors.ALL_ORIGINS,
-        allowMethods: ['OPTIONS', 'GET'],
-      },
-    });
+    const api = new RestApi(this, 'ImportApi');
 
     const importEndpoint = api.root.addResource('import')
     importEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(importProductsFileFunction))
-
-    new CfnOutput(this, 'RestApiUrl', {
-      value: api.url
-    })
   }
 }

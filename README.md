@@ -1,24 +1,39 @@
 # rss-aws-shop-backend
 
-## installation 
+## installation and deployment
 
 Before deploy you should instal aws cli and aws-cdk on you computer
 
-install dependencies
+Install dependencies
 ```bash
 npm install && (cd product-service && npm i) && (cd import-service && npm i)
 ```
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+Build the project
+```bash
+npm run build
+```
 
-## Useful commands
+Synth cdk template
+```bash
+cdk synth
+```
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
+Run bootstrap command (need to run only once)
+```bash
+cdk bootstrap
+```
+
+Deploy <br>
+For getting email form SNS specify your email as parameter
+```bash
+cdk deploy --parameters subscriptionEmail=your@email.here
+```
+
+Remove js and .d.ts files
+```bash
+npm run clean
+```
 
 ## Test
 To run tests you should install docker on you computer
@@ -27,10 +42,4 @@ as tests are require dynamodb-local
 to run test execute
 ```bash
 npm run test
-```
-
-## Test output of lambda functions with SAM (AWS Serverless Application model)
-Before run you should install docker and sam on you computer. [SAM Instruction here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html). [Docker instructions](https://docs.docker.com/desktop/install/mac-install/)
-```bash
-npm run sam:test
 ```

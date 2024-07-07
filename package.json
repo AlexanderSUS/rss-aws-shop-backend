@@ -9,8 +9,10 @@
     "watch": "tsc -w",
     "test": "docker compose up -d && (jest --verbose --silent; docker compose down)",
     "cdk": "cdk",
-    "fill:tables": "ts-node ./test/fill-tables.ts",
-    "clear": "rm ./{test,product-service,import-service,lib,bin}/*.{d.ts,js}"
+    "fill:tables": "AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 NODE_ENV=test LOCAL_DB_HOST=http://localhost:4566 ts-node ./test/fill-tables.ts",
+    "clean": "rm ./{test,product-service,import-service,lib,bin}/*.{d.ts,js}",
+    "deploy:local:product": "npm run build && cdk synth && cdklocal deploy --require-approval never ProductServiceStack && npm run clean",
+    "deploy:local:import": "npm run build && cdk synth && cdklocal deploy --require-approval never ImportServiceStack && npm run clean"
   },
   "devDependencies": {
     "@smithy/types": "^3.2.0",
@@ -27,6 +29,8 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.598.0",
     "@aws-sdk/client-s3": "^3.600.0",
+    "@aws-sdk/client-sns": "^3.609.0",
+    "@aws-sdk/client-sqs": "^3.606.0",
     "@aws-sdk/s3-request-presigner": "^3.600.0",
     "@aws-sdk/util-dynamodb": "^3.602.0",
     "aws-cdk-lib": "^2.145.0",

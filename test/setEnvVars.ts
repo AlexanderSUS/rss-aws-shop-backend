@@ -5,3 +5,4 @@ process.env.AWS_REGION = 'us-east-1';
 process.env.PRODUCT_TABLE_NAME = ProductServiceTable.product;
 process.env.STOCK_TABLE_NAME = ProductServiceTable.stock;
 process.env.BUCKET = 'mybucket';
+process.env.QUEUE_URL = 'https://sqs.us-east-1.amazonaws.com/177715257436/MyQueue'
