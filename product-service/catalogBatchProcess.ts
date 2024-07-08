@@ -68,13 +68,13 @@ export const handler = async (event: SQSEvent) => {
 
     await snsClient.send(
       new PublishCommand({
-        Message: `${new Date().toISOString()}: ${transactionItems.length} products was added to database`,
+        Message: `${transactionItems.length / 2} products was added to database`,
         TopicArn: CREATE_PRODUCT_TOPIC_ARN,
       }),
     );
 
     console.log('COMPLETE!')
   } catch (err) {
-    console.error(`Error = ${JSON.stringify(err)}`);
+    console.error(err);
   }
 }
