@@ -18,10 +18,10 @@ export class ImportServiceStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
       versioned: false, 
       cors:  [{
-        allowedMethods: [HttpMethods.PUT],
+        allowedMethods: [HttpMethods.POST, HttpMethods.PUT],
         allowedOrigins: ['*'],
         allowedHeaders: ['*'],
-        exposedHeaders: ['*'],
+        exposedHeaders: [],
       }]
     })
 
