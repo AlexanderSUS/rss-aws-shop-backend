@@ -109,7 +109,6 @@ export class ProductServiceStack extends cdk.Stack {
     catalogBatchProcessFunction.addEventSource(new SqsEventSource(catalogItemsQueue, {
       batchSize: 5,
     }));
-    catalogBatchProcessFunction.addEnvironment('QUEUE_URL', catalogItemsQueue.queueUrl);
 
     // *** SNS ***
     const snsTopic = new Topic(this, 'CreateProductTopic', { topicName: 'createProductTopic' })
