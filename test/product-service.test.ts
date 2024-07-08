@@ -348,6 +348,8 @@ describe('catalogBatchLambda', () => {
 
     const input = snsMock.call(0).args[0].input as { Message: string };
 
-    expect(input.Message).toBe(`${recordsNum} products was added to database`)
+    const message = JSON.parse(input.Message)
+
+    expect(message.default.message).toBe(`${recordsNum} products was added to database`)
   });
 });

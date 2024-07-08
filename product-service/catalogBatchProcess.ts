@@ -4,6 +4,7 @@ import { clientConfig } from "./clientConfig";
 import { AvailableProduct, CreateProductBody } from "./types";
 import { randomUUID } from "crypto";
 import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
+import { apiSuccessResponse } from "./response";
 
 export const handler = async (event: SQSEvent) => {
   console.log(JSON.stringify(event, null, 2))
@@ -27,14 +28,14 @@ export const handler = async (event: SQSEvent) => {
     }
   }
 
-  const transactionItems = products.reduce((acc, product) => {
-    const productId =  randomUUID();
+  const productsWithId = products.map((product) => ({ ...product, id: randomUUID()}));
 
+  const transactionItems = productsWithId.reduce((acc, product) => {
     acc.push({
       Put: {
         TableName: PRODUCT_TABLE_NAME,
         Item: {
-          id: { S: productId },
+          id: { S: product.id },
           title: { S: product.title },
           description: { S: product.description || '' },
           price: { N: product.price.toString() },
@@ -45,7 +46,7 @@ export const handler = async (event: SQSEvent) => {
       Put: {
         TableName: STOCK_TABLE_NAME,
         Item: {
-          product_id: { S: productId },
+          product_id: { S: product.id },
           count: { N: product?.count.toString() },
         },
       },
@@ -64,16 +65,23 @@ export const handler = async (event: SQSEvent) => {
       TransactItems: transactionItems 
     }));
 
+    const snsMessage = {
+      default: {
+        message: `${transactionItems.length / 2} products was added to database`,
+        products: productsWithId,
+      }
+    }
+
     const snsClient =  new SNSClient()
 
     await snsClient.send(
       new PublishCommand({
-        Message: `${transactionItems.length / 2} products was added to database`,
+        Message: JSON.stringify(snsMessage),
         TopicArn: CREATE_PRODUCT_TOPIC_ARN,
       }),
     );
 
-    console.log('COMPLETE!')
+    return apiSuccessResponse({ message: 'Batch processed successfully'})
   } catch (err) {
     console.error(err);
   }
