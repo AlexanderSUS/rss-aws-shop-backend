@@ -102,7 +102,7 @@ cdklocal deploy --require-approval never ImportServiceStack
 
 You can deploy with one command, but before running update subscriptionEmail in ./deploy-local.sh file
 ```bash
-npm run local:run 
+npm run local:start
 ```
 
 to stop use
