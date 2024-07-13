@@ -9,5 +9,5 @@ export function createCreateProductBody(): CreateProductBody {
     description: `Product ${uuid} description`,
     price: 100,
     count: 10
-  }
+  };
 }

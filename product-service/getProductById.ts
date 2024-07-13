@@ -1,8 +1,8 @@
-import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-import { DynamoDBClient, GetItemCommand, QueryCommand } from "@aws-sdk/client-dynamodb";
-import { apiBadRequestError, apiInternalServerError, apiNotFoundError, apiSuccessResponse } from "./response";
-import { clientConfig } from "./clientConfig";
-import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
+import { apiBadRequestError, apiInternalServerError, apiNotFoundError, apiSuccessResponse } from './response';
+import { clientConfig } from './clientConfig';
+import { unmarshall } from '@aws-sdk/util-dynamodb';
 
 // TODO USE DynamoDocumentDbClient
 
@@ -23,7 +23,7 @@ export const handler = async (event:  APIGatewayEventWithPathParams): Promise<AP
   const productId = event.pathParameters?.productId;
 
   if (!productId || !productId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)) {
-    return apiBadRequestError('Invalid product id')
+    return apiBadRequestError('Invalid product id');
   }
 
   const client = new DynamoDBClient(clientConfig);
@@ -36,12 +36,12 @@ export const handler = async (event:  APIGatewayEventWithPathParams): Promise<AP
           S: productId,
         },
       },
-    })
+    });
 
     const res = await client.send(command);
 
     if (!res.Item) {
-      return apiNotFoundError('Product not found')
+      return apiNotFoundError('Product not found');
     }
 
     const product = unmarshall(res.Item);
@@ -58,11 +58,11 @@ export const handler = async (event:  APIGatewayEventWithPathParams): Promise<AP
     const stockRes = await client.send(getStockItemCommand);
 
     if (!stockRes.Item) {
-      return apiNotFoundError('Product not found')
+      return apiNotFoundError('Product not found');
     }
     const stockItem =  unmarshall(stockRes.Item);
     
-    return apiSuccessResponse({ ...product, count: stockItem.count })
+    return apiSuccessResponse({ ...product, count: stockItem.count });
   } catch (err) {
     return apiInternalServerError();
   }

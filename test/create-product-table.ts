@@ -1,5 +1,5 @@
-import { DynamoDBClient, CreateTableCommand, BillingMode } from "@aws-sdk/client-dynamodb";
-import { ProductServiceTable } from "../product-service/enums";
+import { DynamoDBClient, CreateTableCommand, BillingMode } from '@aws-sdk/client-dynamodb';
+import { ProductServiceTable } from '../product-service/enums';
 
 export async function createProductTable(client: DynamoDBClient) {
   const command = new CreateTableCommand({
@@ -19,5 +19,5 @@ export async function createProductTable(client: DynamoDBClient) {
     BillingMode: BillingMode.PAY_PER_REQUEST 
   });
 
-  return client.send(command)
+  return client.send(command);
 }

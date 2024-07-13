@@ -14,3 +14,5 @@ docker
 .aws-sam
 
 volume
+
+.env

@@ -58,10 +58,10 @@ export class ProductServiceStack extends cdk.Stack {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
       },
-    })
+    });
 
     // *** DynamoDB ***
-    const productTable = new Table(this, "Product", {
+    const productTable = new Table(this, 'Product', {
       tableName: ProductServiceTable.product,
       partitionKey: {
         name: 'id',
@@ -69,9 +69,9 @@ export class ProductServiceStack extends cdk.Stack {
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-    })
+    });
 
-    const stockTable = new Table(this, "Stock", {
+    const stockTable = new Table(this, 'Stock', {
       tableName: ProductServiceTable.stock,
       partitionKey: {
         name: 'product_id',
@@ -79,7 +79,7 @@ export class ProductServiceStack extends cdk.Stack {
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-    })
+    });
 
     productTable.grantReadData(getProductsListFunction);
     productTable.grantReadData(getProductByIdFunction);
@@ -94,7 +94,7 @@ export class ProductServiceStack extends cdk.Stack {
     const productEndpoint = api.root.addResource(ProductEndpoints.products);
     productEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(getProductsListFunction));
     const productWithIdEndpoint = productEndpoint.addResource('{productId}');
-    productWithIdEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(getProductByIdFunction))
+    productWithIdEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(getProductByIdFunction));
     productEndpoint.addMethod(HttpMethod.POST, new LambdaIntegration(createProductFunction));
 
     // *** SQS ***
@@ -111,10 +111,10 @@ export class ProductServiceStack extends cdk.Stack {
     }));
 
     // *** SNS ***
-    const snsTopic = new Topic(this, 'CreateProductTopic', { topicName: 'createProductTopic' })
+    const snsTopic = new Topic(this, 'CreateProductTopic', { topicName: 'createProductTopic' });
     snsTopic.grantPublish(catalogBatchProcessFunction);
     catalogBatchProcessFunction.addEnvironment('CREATE_PRODUCT_TOPIC_ARN', snsTopic.topicArn);
-    const emailAddress = new cdk.CfnParameter(this, "subscriptionEmail");
+    const emailAddress = new cdk.CfnParameter(this, 'subscriptionEmail');
     snsTopic.addSubscription(new EmailSubscription(emailAddress.value.toString()));
   }
 }

@@ -9,6 +9,8 @@ Install dependencies
 npm install && (cd product-service && npm i) && (cd import-service && npm i)
 ```
 
+Create .env file and put there content of env.example file with updated credentials
+
 Build the project
 ```bash
 npm run build

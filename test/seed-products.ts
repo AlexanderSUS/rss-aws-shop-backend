@@ -1,7 +1,7 @@
-import { BatchWriteItemCommandOutput, DynamoDBClient, TransactWriteItem, TransactWriteItemsCommand } from "@aws-sdk/client-dynamodb";
-import { AvailableProduct } from "../product-service/types";
-import { ProductServiceTable } from "../product-service/enums";
-import { createFakeAvailableProducts } from "./create-fake-available-products";
+import { BatchWriteItemCommandOutput, DynamoDBClient, TransactWriteItem, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
+import { AvailableProduct } from '../product-service/types';
+import { ProductServiceTable } from '../product-service/enums';
+import { createFakeAvailableProducts } from './create-fake-available-products';
 
 export async function seedProducts(client: DynamoDBClient): Promise<[AvailableProduct[], BatchWriteItemCommandOutput]>  {
   const products = createFakeAvailableProducts();
@@ -16,7 +16,7 @@ export async function seedProducts(client: DynamoDBClient): Promise<[AvailablePr
         price: { N: product.price.toString() },
       }
     }
-  }))
+  }));
 
   const stockItemsToPut: TransactWriteItem[] = 
     products.map(({ id: product_id, count }) => ({
@@ -27,14 +27,14 @@ export async function seedProducts(client: DynamoDBClient): Promise<[AvailablePr
         count: { N: count.toString() },
       },
     },
-  }))
+  }));
 
   const transaction = new TransactWriteItemsCommand({
     TransactItems: [
       ...productsToPut,
       ...stockItemsToPut, 
     ]
-  })
+  });
 
   const result = await client.send(transaction);
 

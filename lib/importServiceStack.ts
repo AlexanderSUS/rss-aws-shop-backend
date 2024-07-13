@@ -1,10 +1,10 @@
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { AuthorizationType, IdentitySource, LambdaIntegration, RestApi, TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { HttpMethod } from 'aws-cdk-lib/aws-events';
 import { Bucket, EventType, HttpMethods } from 'aws-cdk-lib/aws-s3';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import { S3EventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 
 export class ImportServiceStack extends Stack {
@@ -23,7 +23,7 @@ export class ImportServiceStack extends Stack {
         allowedHeaders: ['*'],
         exposedHeaders: [],
       }]
-    })
+    });
 
     const importProductsFileFunction = new lambda.Function(this, 'ImportProductsFile', {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -46,7 +46,7 @@ export class ImportServiceStack extends Stack {
         actions: [ 's3:GetObject', 's3:DeleteObject', 's3:CopyObject' ],
         resources: [uploadsBucket.bucketArn],
       }),
-    )
+    );
 
     importFileParserFunction.addEventSource(new S3EventSource(uploadsBucket, {
       events: [EventType.OBJECT_CREATED],
@@ -57,7 +57,17 @@ export class ImportServiceStack extends Stack {
 
     const api = new RestApi(this, 'ImportApi');
 
-    const importEndpoint = api.root.addResource('import')
-    importEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(importProductsFileFunction))
+    const importEndpoint = api.root.addResource('import');
+
+    const authorizer = new TokenAuthorizer(this, 'BasicAuthorizer', {
+      handler: lambda.Function.fromFunctionName(this, 'AuthFunction', 'basic-authorizer'),
+      identitySource: IdentitySource.header('Authorization'),
+      resultsCacheTtl: Duration.seconds(0),
+    });
+
+    importEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(importProductsFileFunction), {
+      authorizer,
+      authorizationType: AuthorizationType.CUSTOM
+    });
   }
 }
