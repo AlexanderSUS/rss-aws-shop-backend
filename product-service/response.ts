@@ -6,7 +6,7 @@ export const headers = {
   'Content-Type': 'application/json',
 };   
 
-export function apiSuccessResponse(payload?: Record<string, unknown>) {
+export function apiSuccessResponse(payload?: object) {
   return {
     statusCode: 200,
     headers,
@@ -14,7 +14,7 @@ export function apiSuccessResponse(payload?: Record<string, unknown>) {
   };
 }
 
-export function apiCreateResponse(body: Record<string, unknown>) {
+export function apiCreateResponse(body: object) {
   return {
     statusCode: 201,
     headers,
