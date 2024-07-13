@@ -9,22 +9,28 @@
     "watch": "tsc -w",
     "test": "docker compose up -d && (jest --verbose --silent; docker compose down)",
     "cdk": "cdk",
+    "lint": "eslint --fix",
     "fill:tables": "AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 NODE_ENV=test LOCAL_DB_HOST=http://localhost:4566 ts-node ./test/fill-tables.ts",
     "clean": "rm ./{test,product*,import*,authorization*,lib,bin}/*.{d.ts,js}",
     "local:start": "./scripts/deploy-local.sh",
     "local:stop": "docker compose -f localstack-compose.yaml down"
   },
   "devDependencies": {
+    "@eslint/js": "^9.7.0",
     "@smithy/types": "^3.2.0",
     "@smithy/util-stream": "^3.0.4",
     "@types/aws-lambda": "^8.10.140",
     "@types/jest": "^29.5.12",
     "@types/node": "20.12.7",
     "aws-sdk-client-mock": "^4.0.1",
+    "eslint": "^9.7.0",
+    "eslint-plugin-jest": "^28.6.0",
+    "globals": "^15.8.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
-    "typescript": "~5.4.5"
+    "typescript": "~5.4.5",
+    "typescript-eslint": "^7.16.0"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.598.0",
