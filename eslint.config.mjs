@@ -13,12 +13,11 @@ export default [
     },
   },
   {
-    ignores: ['.aws-sam', 'cdk.out', '**/*.config.js']
+    ignores: ['node_modules', '.aws-sam', 'cdk.out', '**/*.*.js', '**/*.js', '**/*.d.ts']
   },
   {
     languageOptions: { 
-      globals: [globals.node, globals.jest
-    ]},
+      globals: [globals.node ]},
   },
   {
     files: ["**/*.test.ts"],
