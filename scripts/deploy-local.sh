@@ -5,10 +5,7 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
-docker ps | grep -q "localstack/localstack"
-res=$?
-
-if [ $res -eq 0  ]; then
+if docker ps | grep -q "localstack/localstack"; then
 echo "Doker is running"
 else
 docker compose -f localstack-compose.yaml up -d && cdklocal bootstrap
