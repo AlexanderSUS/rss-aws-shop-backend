@@ -59,7 +59,7 @@ export class ImportServiceStack extends Stack {
 
     const importEndpoint = api.root.addResource('import');
 
-    const authorizer = new TokenAuthorizer(this, 'BasicAuthorizer', {
+    const authorizer = new TokenAuthorizer(this, 'TokenAuthorizer', {
       handler: lambda.Function.fromFunctionName(this, 'AuthFunction', 'basic-authorizer'),
       identitySource: IdentitySource.header('Authorization'),
       resultsCacheTtl: Duration.seconds(0),
