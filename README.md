@@ -37,6 +37,11 @@ Remove js and .d.ts files
 npm run clean
 ```
 
+To fill tables with test data run
+```bash
+npm run fill:tables
+```
+
 ## Test
 To run tests you should install docker on you computer
 as tests are require dynamodb-local
@@ -97,10 +102,21 @@ Deploy in localstack
 ```bash
 cdklocal deploy --require-approval never ProductServiceStack --parameters subscriptionEmail=your@email.here
 ```
+Fill tables with fake data
+```bash
+npm run fill:tables
+```
+
 - ImportServiceStack
 ```bash
 cdklocal deploy --require-approval never ImportServiceStack
 ```
+
+- AuthServiceStack
+```bash
+cdklocal deploy --require-approval never AuthServiceStack 
+```
+
 
 You can deploy with one command, but before running update subscriptionEmail in ./deploy-local.sh file
 ```bash

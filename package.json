@@ -10,7 +10,8 @@
     "test": "docker compose up -d && (jest --verbose --silent; docker compose down)",
     "cdk": "cdk",
     "lint": "eslint --fix",
-    "fill:tables": "AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 NODE_ENV=test LOCAL_DB_HOST=http://localhost:4566 ts-node ./test/fill-tables.ts",
+    "fill:tables": "AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 NODE_ENV=test LOCAL_DB_HOST=http://localhost:8000 ts-node ./test/fill-tables.ts",
+    "create:tables": "AWS_ACCESS_KEY_ID=test AWS_SECRET_ACCESS_KEY=test AWS_DEFAULT_REGION=us-east-1 NODE_ENV=test LOCAL_DB_HOST=http://localhost:8000 ts-node ./test/create-tables.ts",
     "clean": "rm ./{test,product*,import*,authorization*,lib,bin}/*.{d.ts,js}",
     "local:start": "./scripts/deploy-local.sh",
     "local:stop": "docker compose -f localstack-compose.yaml down"

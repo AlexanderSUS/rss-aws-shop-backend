@@ -9,6 +9,7 @@ import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import 'dotenv/config';
 
 type Props = {
   importFileParserFunction: lambda.Function;
@@ -27,6 +28,7 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
+        LOCAL_DB_HOST: process.env.LOCAL_DB_HOST!,
       }
     }); 
 
@@ -37,6 +39,7 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
+        LOCAL_DB_HOST: process.env.LOCAL_DB_HOST!,
       },
     }); 
 
@@ -47,6 +50,7 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
+        LOCAL_DB_HOST: process.env.LOCAL_DB_HOST!,
       },
     }); 
 
