@@ -1,7 +1,8 @@
-import { APIGatewayEvent } from 'aws-lambda';
+import { APIGatewayEvent, SQSEvent } from 'aws-lambda';
 import { APIGatewayEventWithPathParams, handler as getProductById } from '../product-service/getProductById';
 import { handler as getProductList } from '../product-service/getProductsList';
 import { handler as createProduct } from '../product-service/createProduct';
+import { handler as catalogBatchProcess } from '../product-service/catalogBatchProcess';
 import { mockApiGatewayEvent } from './mock-api-gateway-event';
 import { createStockTable } from './create-stock-table';
 import { createProductTable } from './create-product-table';
@@ -13,12 +14,27 @@ import { createCreateProductBody } from './create-create-product-body';
 import { ProductServiceTable } from '../product-service/enums';
 import { headers } from '../product-service/response';
 import { clientConfig } from '../product-service/clientConfig';
+import { createFakeAvailableProducts } from './create-fake-available-products';
+import * as sdkClientMock from 'aws-sdk-client-mock';
+import { PublishCommand, SNSClient } from '@aws-sdk/client-sns';
 
 const PRODUCTS_LENGTH = 10;
 
 const client = new DynamoDBClient({
   endpoint: process.env.LOCAL_DB_HOST,
 });
+
+const snsMock = sdkClientMock.mockClient(SNSClient)
+
+function getSQSEvent(recordsNum: number) {
+  return {
+    Records: createFakeAvailableProducts(recordsNum).map((p) => {
+      const product: Partial<AvailableProduct> = p;
+      delete product.id
+      return { body: JSON.stringify(product) }
+    })
+  }  as unknown as SQSEvent
+}
 
 beforeEach(async () => {
   await createProductTable(client);
@@ -27,6 +43,8 @@ beforeEach(async () => {
 
 afterEach(async () => {
   jest.restoreAllMocks();
+
+  snsMock.reset();
 
   await client.send(new DeleteTableCommand({
     TableName: ProductServiceTable.product
@@ -280,4 +298,58 @@ describe('createProduct', () => {
 
     expect(res.statusCode).toBe(500);
   })
-})
+});
+
+
+describe('catalogBatchLambda', () => {
+  test('should seed product table with proper number of records', async () => {
+    const recordsNum = 5
+    await catalogBatchProcess(getSQSEvent(recordsNum))
+
+    const res = await client.send(
+      new ScanCommand({
+        TableName: ProductServiceTable.product,
+        Select: 'COUNT', 
+        ReturnConsumedCapacity: 'INDEXES'
+      })
+    )
+
+    expect(res.Count).toBe(recordsNum);
+  });
+
+  test('should seed stock table with proper number of records', async () => {
+    const recordsNum = 5
+    await catalogBatchProcess(getSQSEvent(recordsNum))
+
+    const res = await client.send(
+      new ScanCommand({
+        TableName: ProductServiceTable.stock,
+        Select: 'COUNT', 
+        ReturnConsumedCapacity: 'INDEXES'
+      })
+    )
+
+    expect(res.Count).toBe(recordsNum);
+  })
+
+  test('should call SqsClient ', async () => {
+    snsMock.resolves({});
+
+    await catalogBatchProcess(getSQSEvent(5))
+
+    expect(snsMock.calls()).toHaveLength(1)
+  });
+
+  test('should call SqsClient with proper message', async () => {
+    const recordsNum = 5
+    snsMock.resolves({});
+
+    await catalogBatchProcess(getSQSEvent(recordsNum))
+
+    const input = snsMock.call(0).args[0].input as { Message: string };
+
+    const message = JSON.parse(input.Message)
+
+    expect(message.default.message).toBe(`${recordsNum} products was added to database`)
+  });
+});

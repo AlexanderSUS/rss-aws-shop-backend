@@ -6,6 +6,24 @@ servers:
   # TODO change URL
   - url: http://api.example.com/
 paths:
+  /import:
+    get:
+      summary: Returns presigned URL for csv file upload
+      tags:
+        - import
+      responses:
+        '200':
+          description: Url successfully created 
+          content:
+             text/plain:
+               example: http://localhost:4566/importservicestack-bucketforuploads7be8e7a8-607ae7b2/uploaded/testfile.csv?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=LSIAQAAAAAAALBC2HH74%2F20240708%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240708T192705Z&X-Amz-Expires=3600&X-Amz-Security-Token=FQoGZXIvYXdzEBYaDlS3%2B2%2FI0BW%2FOzYQhSSVXV1I7WmYKXe%2B2WKBn7wqy%2F1RIoPKY%2BgP0x%2F3Y9WSd5V%2FkWHOCF4gJG3y46g3QKMRJ1lYSMTKHfB%2Fcx3HwhwU3eZDJmoEaril%2FIGevyt80AyPJWSMKsoETwSbc61QI8Jqy%2F3LqTIdLVefwsSWLuDQt6yo5lkM1GaemU3dopg2SjlO%2FA1qbmYwKZWJUvTD6UCRwxMkuDIk6RYtNOfeangPs3XuYH8nQ8QaPZ7ExsBzk4KbBC1VRr0BuPIBGawphXgzFDFpWURzdXxDOxVAsNOePgi4sqav1uyauKHxxK8pQe701mpI%2BzPncpWdW3sFf4w%3D&X-Amz-Signature=96f5810818d0022fb3feb5ec2c2b3fdccd01707f940d58b1189c87199aa2b152&X-Amz-SignedHeaders=host&x-id=PutObject
+        '500':
+          description: Interlal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/internalServerError'
+
   /products:
     get:
       summary: Returns a list of products.
@@ -172,3 +190,9 @@ components:
           type: number
           description: available products in stock
           example: 2
+    internalServerError:
+      properties:
+        message: 
+          description: error message 
+          type: string
+          example: Internal server error

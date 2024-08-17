@@ -1,13 +1,17 @@
 import { App } from "aws-cdk-lib"
 import { ProductServiceStack } from "../lib/productServiceStack"
 import { Match, Template } from "aws-cdk-lib/assertions"
+import { ImportServiceStack } from "../lib/importServiceStack";
 
 describe('ProductService stack test', () => {
   let productServiceStackTemplate: Template;
 
   beforeAll(() => {
     const testApp = new App({ outdir: 'cdk.out' });
-    const productServiceStack = new ProductServiceStack(testApp, 'ProductServiceStack')
+    const importServiceStack = new ImportServiceStack(testApp, "ImportServiceStack", {})
+    const productServiceStack = new ProductServiceStack(testApp, 'ProductServiceStack', {
+      importFileParserFunction: importServiceStack.importFileParserFunction
+    })
     productServiceStackTemplate = Template.fromStack(productServiceStack);
   })
 

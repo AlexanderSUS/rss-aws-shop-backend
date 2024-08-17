@@ -7,6 +7,8 @@ import { Readable } from "stream";
 import { sdkStreamMixin } from "@smithy/util-stream";
 import * as sdkClientMock from 'aws-sdk-client-mock';
 import { CopyObjectCommand, DeleteObjectCommand, GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { SQSClient } from "@aws-sdk/client-sqs";
+import { createReadStream } from "fs";
 
 
 jest.mock("@aws-sdk/s3-request-presigner", () => ({
@@ -17,6 +19,7 @@ type APIGatewayEventWithQSParams = APIGatewayEvent & {
   queryStringParameters: { name: string }
 }
 
+const sqsMock = sdkClientMock.mockClient(SQSClient)
 const s3Mock = sdkClientMock.mockClient(S3Client);
 const BUCKET = 'mybucket';
 const KEY = 'testFile.csv';
@@ -87,9 +90,8 @@ describe('importProductsFile', () => {
 
 describe('importFileParser', () => {
   test('should not trow error', async () => {
-    const stream = new Readable();
+    const stream = createReadStream('./test/testfile.csv');
 
-    stream.push(CSVString);
     stream.push(null);
     const sdkStream = sdkStreamMixin(stream);
 
@@ -98,11 +100,16 @@ describe('importFileParser', () => {
     await expect(importFileParser(mockS3Event)).resolves.toBeUndefined();
   });
 
+  // TODO
+  // shouldn't call GetObjectCommand if AWS_REGION isn't specified
+  // shouldn't call GetObjectCommand if QUEUE_URL isn't specified
+  // shouldn't call SQSClient.send if Body is empty 
+  // shouldn't call CopyObjectCommand if sqsClient rejects 
+
 
   test('should call CopyObjectCommand', async () => {
-    const stream = new Readable();
+    const stream = createReadStream('./test/testfile.csv');
 
-    stream.push(CSVString);
     stream.push(null);
     const sdkStream = sdkStreamMixin(stream);
 

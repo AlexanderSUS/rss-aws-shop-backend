@@ -1,24 +1,39 @@
 # rss-aws-shop-backend
 
-## installation 
+## installation and deployment
 
 Before deploy you should instal aws cli and aws-cdk on you computer
 
-install dependencies
+Install dependencies
 ```bash
 npm install && (cd product-service && npm i) && (cd import-service && npm i)
 ```
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+Build the project
+```bash
+npm run build
+```
 
-## Useful commands
+Synth cdk template
+```bash
+cdk synth
+```
 
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `npx cdk deploy`  deploy this stack to your default AWS account/region
-* `npx cdk diff`    compare deployed stack with current state
-* `npx cdk synth`   emits the synthesized CloudFormation template
+Run bootstrap command (need to run only once)
+```bash
+cdk bootstrap
+```
+
+Deploy <br>
+For getting email form SNS specify your email as parameter
+```bash
+cdk deploy ProductServiceStack --parameters subscriptionEmail=your@email.here && cdk deploy ImportServiceStack
+```
+
+Remove js and .d.ts files
+```bash
+npm run clean
+```
 
 ## Test
 To run tests you should install docker on you computer
@@ -29,8 +44,76 @@ to run test execute
 npm run test
 ```
 
-## Test output of lambda functions with SAM (AWS Serverless Application model)
-Before run you should install docker and sam on you computer. [SAM Instruction here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html). [Docker instructions](https://docs.docker.com/desktop/install/mac-install/)
+## Run app locally with localstack
+#### install localstack tools
+Install aws-cdk-local
 ```bash
-npm run sam:test
+npm install -g aws-cdk-local
 ```
+Install awslocal
+
+```bash
+python3 -m pip --version
+python3 -m pip install awscli-local
+awslocal --version
+```
+if you got "command not found" error add following string to your ~/.zshrc(.bashrc) file for mac or Linux. Or google the how to do it if you Windows guy<br>
+**don't forget to replace your user and check python version in path**
+```
+export PATH="/Users/your_username/Library/Python/3.9/bin:$PATH"
+```
+#### Deploy
+start localstack in docker
+
+After containers starts you can see available resources in [web interface](https://app.localstack.cloud/inst/default/status)
+
+```bash
+docker compose -f localstack-compose.yaml up -d
+```
+stop localstack container
+```bash
+docker compose -f localstack-compose.yaml down
+```
+
+bootstrap cdk
+```bash
+cdklocal bootstrap
+```
+
+build project
+```bash
+npm run build
+```
+
+synth cdk assets and templates
+```bash
+cdk synth
+```
+
+Deploy in localstack
+- ProductServiceStack. Don't forget to change `subscriptionEmail` parameter
+```bash
+cdklocal deploy --require-approval never ProductServiceStack --parameters subscriptionEmail=your@email.here
+```
+- ImportServiceStack
+```bash
+cdklocal deploy --require-approval never ImportServiceStack
+```
+
+You can deploy with one command, but before running update subscriptionEmail in ./deploy-local.sh file
+```bash
+npm run local:run 
+```
+
+to stop use
+```bash
+npm run local:stop
+```
+
+You can use command `awslocal` to call you resources. For example
+```bash
+BUCKET_NAME=$(awslocal s3 ls | grep importservicestack | awk '{ print $3 }') && \
+awslocal s3api put-object --bucket  "$BUCKET_NAME" --key uploaded/testfile.csv --body ./test/testfile.csv && \
+awslocal s3api list-objects --bucket  "$BUCKET_NAME"
+```
+Due to current importservicestack's bucket cors policy you can't see objects via web interface

@@ -3,6 +3,8 @@ import { createPresignedUrlWithClient } from "./createPresignedUrlWithClient";
 import { apiBadRequestError, apiInternalServerError } from "./response";
 
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult>  => {
+  console.log(JSON.stringify(event, null, 2));
+
   const REGION = process.env.AWS_REGION;
   const BUCKET = process.env.BUCKET;
   const queryStringParameters = event.queryStringParameters;
