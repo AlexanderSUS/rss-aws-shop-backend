@@ -8,7 +8,7 @@ import * as Joi from 'joi';
 
 export const createProductBodySchema = Joi.object({
   title: Joi.string().required(),
-  price: Joi.number().positive().required(),
+  price: Joi.number().positive().integer().required(),
   description: Joi.string().default(""),
   count: Joi.number().integer().min(0).required(),
 })
@@ -68,5 +68,5 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     return apiInternalServerError()
   }
 
-  return apiCreateResponse();
+  return apiCreateResponse({ id: productId });
 }

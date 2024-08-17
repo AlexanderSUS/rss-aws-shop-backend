@@ -2,6 +2,7 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { ProductServiceStack } from '../lib/productServiceStack';
+import { ImportServiceStack } from '../lib/importServiceStack';
 
 const app = new cdk.App();
 new ProductServiceStack(app, 'ProductServiceStack', {
@@ -19,3 +20,5 @@ new ProductServiceStack(app, 'ProductServiceStack', {
 
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
 });
+
+new ImportServiceStack(app, 'ImportServiceStack', {})

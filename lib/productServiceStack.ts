@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { HttpMethod } from 'aws-cdk-lib/aws-events';
-import { Cors, LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { AttributeType, BillingMode, Table } from 'aws-cdk-lib/aws-dynamodb';
 import { ProductEndpoints, ProductServiceTable } from '../product-service/enums';
 
@@ -17,7 +17,6 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
-        LOCAL_DB_HOST: 'http://localhost:8000',
       }
     }); 
 
@@ -28,7 +27,6 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
-        LOCAL_DB_HOST: 'http://localhost:8000',
       },
     }); 
 
@@ -39,14 +37,13 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
-        LOCAL_DB_HOST: 'http://localhost:8000',
       },
     }); 
 
     const productTable = new Table(this, "Product", {
       tableName: ProductServiceTable.product,
       partitionKey: {
-        name: id,
+        name: 'id',
         type: AttributeType.STRING,
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
@@ -65,16 +62,13 @@ export class ProductServiceStack extends cdk.Stack {
 
     productTable.grantReadData(getProductsListFunction);
     productTable.grantReadData(getProductByIdFunction);
-
     productTable.grantReadWriteData(createProductFunction);
+
+    stockTable.grantReadData(getProductsListFunction);
+    stockTable.grantReadData(getProductByIdFunction);
     stockTable.grantReadWriteData(createProductFunction);
     
-    const api = new RestApi(this, 'ShopAPI', {
-      defaultCorsPreflightOptions: {
-        allowOrigins: Cors.ALL_ORIGINS,
-        allowMethods: ['OPTIONS', 'POST', 'GET'],
-      },
-    });
+    const api = new RestApi(this, 'ShopAPI');
 
     const productEndpoint = api.root.addResource(ProductEndpoints.products);
     productEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(getProductsListFunction));
@@ -83,9 +77,5 @@ export class ProductServiceStack extends cdk.Stack {
     productWithIdEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(getProductByIdFunction))
 
     productEndpoint.addMethod(HttpMethod.POST, new LambdaIntegration(createProductFunction));
-    
-    new cdk.CfnOutput(this, 'RestApiUrl', {
-      value: api.url!,
-    });
   }
 }
