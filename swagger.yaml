@@ -20,29 +20,61 @@ paths:
               schema: 
                 type: array 
                 items:
-                  type: object
-                  properties:
-                    id: 
-                      type: string
-                      format: uuid
-                      description: Product id
-                    name:
-                      type: string
-                      description: Product title
-                    price:
-                      type: number
-                      description: Product price
+                  $ref: '#/components/schemas/availableProduct'
+        '500':
+          description: Internal server error 
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
               example:
-                - id: "1" 
-                  title: "Product 1" 
-                  price: 100 
-                - id: "2" 
-                  title: "Product 2" 
-                  price: 200 
-                - id: "3"
-                  title: "Product 3" 
-                  price: 300 
-
+                message: Internal server error
+    post:
+      summary: Create product 
+      tags: 
+        - products
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createProductPayload' 
+      responses: 
+        '201':
+          description: OK
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string 
+              example:
+                message: Success
+        '400':
+          description: Bad request 
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+              example:
+                message: Invalid product id 
+        '500':
+          description: Internal server error 
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+              example:
+                message: Internal server error 
   /products/{productId}:
     get:
       summary: Returns a product by ID.
@@ -56,29 +88,25 @@ paths:
             type : string 
             format: uuid 
           example:
-            "1"
+            "6c81a41b-c4b5-46a8-9615-9b4fe9ddfa01"
       responses: 
         '200':
           description: OK
           content:
             application/json:
               schema: 
+                $ref: '#/components/schemas/availableProduct'
+        '400':
+          description: Bad request 
+          content:
+            application/json:
+              schema: 
                 type: object
                 properties:
-                  id: 
+                  message: 
                     type: string
-                    format: uuid
-                    description: Product id
-                  name:
-                    type: string
-                    description: Product name 
-                  price:
-                    type: number
-                    description: Product price
               example:
-                id: "1"
-                name: Product 1 
-                price: 1
+                message: Invalid product id 
         '404':
           description: Product not found 
           content:
@@ -86,9 +114,61 @@ paths:
               schema: 
                 type: object
                 properties:
-                  statusCode:
-                    type: number
                   message: 
                     type: string
               example:
                 message: Product not found 
+        '500':
+          description: Internal server error 
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+              example:
+                message: Internal server error 
+components:
+  schemas:
+    availableProduct:
+      properties:
+        id: 
+          type: string
+          format: uuid
+          description: Product id
+          example: 6c81a41b-c4b5-46a8-9615-9b4fe9ddfa01
+        title:
+          type: string
+          description: Product title
+          example: Product 1 title
+        price:
+          type: number
+          description: Product price
+          example: 100
+        description:
+          type: string
+          description: product description
+          example: Product 1 description
+        count:
+          type: number
+          description: available products in stock
+          example: 2
+    createProductPayload:
+      properties:
+        title:
+          type: string
+          description: Product title
+          example: Product 1 title
+        price:
+          type: number
+          description: Product price
+          example: 100
+        description:
+          type: string
+          description: product description
+          example: Product 1 description
+        count:
+          type: number
+          description: available products in stock
+          example: 2
