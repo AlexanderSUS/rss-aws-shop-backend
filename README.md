@@ -1,3 +1,12 @@
+# installation 
+
+Before deploy you should instal aws cli and aws-cdk on you computer
+
+install dependencies
+```bash
+npm install
+```
+
 # Welcome to your CDK TypeScript project
 
 This is a blank project for CDK development with TypeScript.
