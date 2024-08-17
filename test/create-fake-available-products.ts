@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { AvailableProduct } from "../product-service/types";
+import { AvailableProduct } from '../product-service/types';
 
 export function createFakeAvailableProducts(length = 10): AvailableProduct[] {
   return Array(length).fill(null).map((_, i) => ({
@@ -8,6 +8,6 @@ export function createFakeAvailableProducts(length = 10): AvailableProduct[] {
     description:  `Product ${i} description`,
     price: (i + 1) * 100 ,
     count: i
-  }))
+  }));
 }
 

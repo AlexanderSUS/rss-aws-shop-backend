@@ -1,20 +1,20 @@
-import { DynamoDBClient, TransactWriteItem, TransactWriteItemsCommand } from "@aws-sdk/client-dynamodb";
-import { SQSEvent } from "aws-lambda";
-import { clientConfig } from "./clientConfig";
-import { AvailableProduct, CreateProductBody } from "./types";
-import { randomUUID } from "crypto";
-import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
-import { apiSuccessResponse } from "./response";
+import { DynamoDBClient, TransactWriteItem, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
+import { SQSEvent } from 'aws-lambda';
+import { clientConfig } from './clientConfig';
+import { AvailableProduct, CreateProductBody } from './types';
+import { randomUUID } from 'crypto';
+import { PublishCommand, SNSClient } from '@aws-sdk/client-sns';
+import { apiSuccessResponse } from './response';
 
 export const handler = async (event: SQSEvent) => {
-  console.log(JSON.stringify(event, null, 2))
+  console.log(JSON.stringify(event, null, 2));
 
   const STOCK_TABLE_NAME = process.env.STOCK_TABLE_NAME;
   const PRODUCT_TABLE_NAME = process.env.PRODUCT_TABLE_NAME;
-  const CREATE_PRODUCT_TOPIC_ARN = process.env.CREATE_PRODUCT_TOPIC_ARN
+  const CREATE_PRODUCT_TOPIC_ARN = process.env.CREATE_PRODUCT_TOPIC_ARN;
 
   if (!STOCK_TABLE_NAME || !PRODUCT_TABLE_NAME) {
-    return console.error('Error some of env variables is undefined')
+    return console.error('Error some of env variables is undefined');
   }
 
   const products: CreateProductBody[] = [];
@@ -52,8 +52,8 @@ export const handler = async (event: SQSEvent) => {
       },
     });
 
-    return acc
-  }, [] as TransactWriteItem[])
+    return acc;
+  }, [] as TransactWriteItem[]);
 
 
   try {
@@ -70,9 +70,9 @@ export const handler = async (event: SQSEvent) => {
         message: `${transactionItems.length / 2} products was added to database`,
         products: productsWithId,
       }
-    }
+    };
 
-    const snsClient =  new SNSClient()
+    const snsClient =  new SNSClient();
 
     await snsClient.send(
       new PublishCommand({
@@ -81,8 +81,8 @@ export const handler = async (event: SQSEvent) => {
       }),
     );
 
-    return apiSuccessResponse({ message: 'Batch processed successfully'})
+    return apiSuccessResponse({ message: 'Batch processed successfully'});
   } catch (err) {
     console.error(err);
   }
-}
+};

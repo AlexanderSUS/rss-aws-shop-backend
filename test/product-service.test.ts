@@ -6,7 +6,7 @@ import { handler as catalogBatchProcess } from '../product-service/catalogBatchP
 import { mockApiGatewayEvent } from './mock-api-gateway-event';
 import { createStockTable } from './create-stock-table';
 import { createProductTable } from './create-product-table';
-import { DeleteTableCommand, DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
+import { DeleteTableCommand, DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { seedProducts } from './seed-products';
 import { AvailableProduct, CreateProductBody } from '../product-service/types';
 import { randomUUID } from 'crypto';
@@ -16,7 +16,7 @@ import { headers } from '../product-service/response';
 import { clientConfig } from '../product-service/clientConfig';
 import { createFakeAvailableProducts } from './create-fake-available-products';
 import * as sdkClientMock from 'aws-sdk-client-mock';
-import { PublishCommand, SNSClient } from '@aws-sdk/client-sns';
+import { SNSClient } from '@aws-sdk/client-sns';
 
 const PRODUCTS_LENGTH = 10;
 
@@ -24,16 +24,16 @@ const client = new DynamoDBClient({
   endpoint: process.env.LOCAL_DB_HOST,
 });
 
-const snsMock = sdkClientMock.mockClient(SNSClient)
+const snsMock = sdkClientMock.mockClient(SNSClient);
 
 function getSQSEvent(recordsNum: number) {
   return {
     Records: createFakeAvailableProducts(recordsNum).map((p) => {
       const product: Partial<AvailableProduct> = p;
-      delete product.id
-      return { body: JSON.stringify(product) }
+      delete product.id;
+      return { body: JSON.stringify(product) };
     })
-  }  as unknown as SQSEvent
+  }  as unknown as SQSEvent;
 }
 
 beforeEach(async () => {
@@ -48,19 +48,19 @@ afterEach(async () => {
 
   await client.send(new DeleteTableCommand({
     TableName: ProductServiceTable.product
-  }))
+  }));
 
   await client.send(new DeleteTableCommand({
     TableName: ProductServiceTable.stock
-  }))
-})
+  }));
+});
 
  describe('getProductById', () => {
   let products: AvailableProduct[];
 
   beforeEach(async () => {
     [products] = await seedProducts(client);
-  })
+  });
 
   test('should return 200 status code on existent id', async() => {
     const res = await getProductById(
@@ -72,7 +72,7 @@ afterEach(async () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.headers).toEqual(headers);
-  })
+  });
 
   test('should return proper product object', async () => {
     const [expectedProduct] = products;
@@ -86,13 +86,13 @@ afterEach(async () => {
 
     const product = JSON.parse(res.body);
 
-    expect(Object.keys(product)).toHaveLength(5)
+    expect(Object.keys(product)).toHaveLength(5);
 
     expect(product).toHaveProperty('id', expectedProduct.id);
     expect(product).toHaveProperty('title', expectedProduct.title);
     expect(product).toHaveProperty('description', expectedProduct.description);
     expect(product).toHaveProperty('price', expectedProduct.price);
-    expect(product).toHaveProperty('count', expectedProduct.count)
+    expect(product).toHaveProperty('count', expectedProduct.count);
   });
 
   test('should return 404 status code if product not found', async() => {
@@ -123,7 +123,7 @@ afterEach(async () => {
     expect(res.statusCode).toBe(400);
     expect(res.headers).toEqual(headers);
     expect(body).toHaveProperty('message', 'Invalid product id');
-  })
+  });
 
   test('should return 400 status code if id was not provided', async() => {
     const res = await getProductById(
@@ -135,12 +135,12 @@ afterEach(async () => {
     expect(res.statusCode).toBe(400);
     expect(res.headers).toEqual(headers);
     expect(body).toHaveProperty('message', 'Invalid product id');
-  })
+  });
 
 
 
   test('should return 500 statusCode if database connection is broken', async () => {
-    jest.replaceProperty(clientConfig, 'endpoint', undefined)
+    jest.replaceProperty(clientConfig, 'endpoint', undefined);
     
     const res = await getProductById({
         ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
@@ -149,8 +149,8 @@ afterEach(async () => {
     );
 
     expect(res.statusCode).toBe(500);
-  })
-})
+  });
+});
 
 describe('getProductsList', () => {
   test('should return 200 status code on success response', async () => {
@@ -178,7 +178,7 @@ describe('getProductsList', () => {
 
     const [item] = JSON.parse(res.body);
 
-    expect(Object.keys(item)).toHaveLength(5)
+    expect(Object.keys(item)).toHaveLength(5);
     expect(item).toHaveProperty('id');
     expect(item).toHaveProperty('title');
     expect(item).toHaveProperty('description');
@@ -195,22 +195,22 @@ describe('getProductsList', () => {
   });
 
   test('should return 500 statusCode if database connection is broken', async () => {
-    jest.replaceProperty(clientConfig, 'endpoint', undefined)
+    jest.replaceProperty(clientConfig, 'endpoint', undefined);
     
     const res = await getProductList({} as unknown as APIGatewayEvent);
 
     expect(res.statusCode).toBe(500);
-  })
-})
+  });
+});
 
 describe('createProduct', () => {
   test('should return 201 status code on success', async () => {
     const res = await createProduct({
         ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
         body: JSON.stringify(createCreateProductBody())
-    })
+    });
 
-    expect(res.statusCode).toBe(201)
+    expect(res.statusCode).toBe(201);
   });
 
   test('should return id of newly created record', async () => {
@@ -219,18 +219,18 @@ describe('createProduct', () => {
       body: JSON.stringify(createCreateProductBody())
     });
 
-    const body = JSON.parse(res.body) as { id: string }
+    const body = JSON.parse(res.body) as { id: string };
 
     expect(body).toHaveProperty('id');
     expect(typeof body.id === 'string').toBeTruthy();
-    expect(body.id.length).toBe(36)
+    expect(body.id.length).toBe(36);
   });
 
   test(`should create item in ${ProductServiceTable.product} table`, async () => {
     await createProduct({
         ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
         body: JSON.stringify(createCreateProductBody())
-    })
+    });
 
     const command = new ScanCommand({
       TableName: ProductServiceTable.product,
@@ -239,14 +239,14 @@ describe('createProduct', () => {
     const response = await client.send(command);
 
     expect(response.Count).toBe(1);
-    expect(response.Items).toHaveLength(1)
-  })
+    expect(response.Items).toHaveLength(1);
+  });
 
   test(`should create item in ${ProductServiceTable.stock} table`, async () => {
     await createProduct({
         ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
         body: JSON.stringify(createCreateProductBody())
-    })
+    });
 
     const command = new ScanCommand({
       TableName: ProductServiceTable.stock,
@@ -255,17 +255,17 @@ describe('createProduct', () => {
     const response = await client.send(command);
 
     expect(response.Count).toBe(1);
-    expect(response.Items).toHaveLength(1)
-  })
+    expect(response.Items).toHaveLength(1);
+  });
 
   test('should return 400 error if body is null', async () => {
     const res = await createProduct({
       ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
       body: null 
-    })
+    });
 
-    expect(res.statusCode).toBe(400)
-  })
+    expect(res.statusCode).toBe(400);
+  });
 
   test.each([
     ['title was not provided', (p: Partial<CreateProductBody>) => delete p.title],
@@ -277,34 +277,34 @@ describe('createProduct', () => {
     ['count less than 0', (p: Partial<CreateProductBody>) => p.count = -10],
     ['count is not integer number', (p: Partial<CreateProductBody>) => p.count = 1.03],
   ])('should return 400 error if %s', async (condition, mutateFn) => {
-    const product = createCreateProductBody()
-    mutateFn(product)
+    const product = createCreateProductBody();
+    mutateFn(product);
 
     const res = await createProduct({
         ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
         body: JSON.stringify(product)
-    })
+    });
 
-    expect(res.statusCode).toBe(400)
-  })
+    expect(res.statusCode).toBe(400);
+  });
 
   test('should return 500 statusCode if database connection is broken', async () => {
-    jest.replaceProperty(clientConfig, 'endpoint', undefined)
+    jest.replaceProperty(clientConfig, 'endpoint', undefined);
     
     const res = await createProduct({
         ...mockApiGatewayEvent as unknown as  APIGatewayEvent, 
         body: JSON.stringify(createCreateProductBody())
-    })
+    });
 
     expect(res.statusCode).toBe(500);
-  })
+  });
 });
 
 
 describe('catalogBatchLambda', () => {
   test('should seed product table with proper number of records', async () => {
-    const recordsNum = 5
-    await catalogBatchProcess(getSQSEvent(recordsNum))
+    const recordsNum = 5;
+    await catalogBatchProcess(getSQSEvent(recordsNum));
 
     const res = await client.send(
       new ScanCommand({
@@ -312,14 +312,14 @@ describe('catalogBatchLambda', () => {
         Select: 'COUNT', 
         ReturnConsumedCapacity: 'INDEXES'
       })
-    )
+    );
 
     expect(res.Count).toBe(recordsNum);
   });
 
   test('should seed stock table with proper number of records', async () => {
-    const recordsNum = 5
-    await catalogBatchProcess(getSQSEvent(recordsNum))
+    const recordsNum = 5;
+    await catalogBatchProcess(getSQSEvent(recordsNum));
 
     const res = await client.send(
       new ScanCommand({
@@ -327,29 +327,29 @@ describe('catalogBatchLambda', () => {
         Select: 'COUNT', 
         ReturnConsumedCapacity: 'INDEXES'
       })
-    )
+    );
 
     expect(res.Count).toBe(recordsNum);
-  })
+  });
 
-  test('should call SqsClient ', async () => {
+  test('should call SqsClient', async () => {
     snsMock.resolves({});
 
-    await catalogBatchProcess(getSQSEvent(5))
+    await catalogBatchProcess(getSQSEvent(5));
 
-    expect(snsMock.calls()).toHaveLength(1)
+    expect(snsMock.calls()).toHaveLength(1);
   });
 
   test('should call SqsClient with proper message', async () => {
-    const recordsNum = 5
+    const recordsNum = 5;
     snsMock.resolves({});
 
-    await catalogBatchProcess(getSQSEvent(recordsNum))
+    await catalogBatchProcess(getSQSEvent(recordsNum));
 
     const input = snsMock.call(0).args[0].input as { Message: string };
 
-    const message = JSON.parse(input.Message)
+    const message = JSON.parse(input.Message);
 
-    expect(message.default.message).toBe(`${recordsNum} products was added to database`)
+    expect(message.default.message).toBe(`${recordsNum} products was added to database`);
   });
 });

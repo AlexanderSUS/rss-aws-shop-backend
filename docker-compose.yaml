@@ -8,3 +8,8 @@ services:
         - DDB_LOCAL_TELEMETRY=0
     ports:
       - "8000:8000"
+    networks:
+      - cdk-test-network 
+
+networks:
+  cdk-test-network:

@@ -9,6 +9,7 @@ import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import 'dotenv/config';
 
 type Props = {
   importFileParserFunction: lambda.Function;
@@ -27,6 +28,7 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
+        LOCAL_DB_HOST: process.env.LOCAL_DB_HOST!,
       }
     }); 
 
@@ -37,6 +39,7 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
+        LOCAL_DB_HOST: process.env.LOCAL_DB_HOST!,
       },
     }); 
 
@@ -47,6 +50,7 @@ export class ProductServiceStack extends cdk.Stack {
       environment: {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
+        LOCAL_DB_HOST: process.env.LOCAL_DB_HOST!,
       },
     }); 
 
@@ -58,10 +62,10 @@ export class ProductServiceStack extends cdk.Stack {
         STOCK_TABLE_NAME: ProductServiceTable.stock,
         PRODUCT_TABLE_NAME: ProductServiceTable.product,
       },
-    })
+    });
 
     // *** DynamoDB ***
-    const productTable = new Table(this, "Product", {
+    const productTable = new Table(this, 'Product', {
       tableName: ProductServiceTable.product,
       partitionKey: {
         name: 'id',
@@ -69,9 +73,9 @@ export class ProductServiceStack extends cdk.Stack {
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-    })
+    });
 
-    const stockTable = new Table(this, "Stock", {
+    const stockTable = new Table(this, 'Stock', {
       tableName: ProductServiceTable.stock,
       partitionKey: {
         name: 'product_id',
@@ -79,7 +83,7 @@ export class ProductServiceStack extends cdk.Stack {
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-    })
+    });
 
     productTable.grantReadData(getProductsListFunction);
     productTable.grantReadData(getProductByIdFunction);
@@ -94,7 +98,7 @@ export class ProductServiceStack extends cdk.Stack {
     const productEndpoint = api.root.addResource(ProductEndpoints.products);
     productEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(getProductsListFunction));
     const productWithIdEndpoint = productEndpoint.addResource('{productId}');
-    productWithIdEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(getProductByIdFunction))
+    productWithIdEndpoint.addMethod(HttpMethod.GET, new LambdaIntegration(getProductByIdFunction));
     productEndpoint.addMethod(HttpMethod.POST, new LambdaIntegration(createProductFunction));
 
     // *** SQS ***
@@ -111,10 +115,10 @@ export class ProductServiceStack extends cdk.Stack {
     }));
 
     // *** SNS ***
-    const snsTopic = new Topic(this, 'CreateProductTopic', { topicName: 'createProductTopic' })
+    const snsTopic = new Topic(this, 'CreateProductTopic', { topicName: 'createProductTopic' });
     snsTopic.grantPublish(catalogBatchProcessFunction);
     catalogBatchProcessFunction.addEnvironment('CREATE_PRODUCT_TOPIC_ARN', snsTopic.topicArn);
-    const emailAddress = new cdk.CfnParameter(this, "subscriptionEmail");
+    const emailAddress = new cdk.CfnParameter(this, 'subscriptionEmail');
     snsTopic.addSubscription(new EmailSubscription(emailAddress.value.toString()));
   }
 }

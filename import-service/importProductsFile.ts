@@ -1,6 +1,6 @@
-import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-import { createPresignedUrlWithClient } from "./createPresignedUrlWithClient";
-import { apiBadRequestError, apiInternalServerError } from "./response";
+import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { createPresignedUrlWithClient } from './createPresignedUrlWithClient';
+import { apiBadRequestError, apiInternalServerError } from './response';
 
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult>  => {
   console.log(JSON.stringify(event, null, 2));
@@ -22,7 +22,7 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
         region: REGION,
         bucket: BUCKET,
         key,
-      })
+      });
 
       return {
         statusCode: 200,
@@ -33,11 +33,11 @@ export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyRe
           'Content-Type': 'text/plain',
         },
         body: clientUrl,
-      }    
+      };    
     } catch (err) {
-      return apiInternalServerError('An error occurs during signing process')
+      return apiInternalServerError('An error occurs during signing process');
     }
   }
 
-  return apiBadRequestError('Bad parameter')
-}
+  return apiBadRequestError('Bad parameter');
+};

@@ -9,6 +9,8 @@ Install dependencies
 npm install && (cd product-service && npm i) && (cd import-service && npm i)
 ```
 
+Create .env file and put there content of env.example file with updated credentials
+
 Build the project
 ```bash
 npm run build
@@ -33,6 +35,11 @@ cdk deploy ProductServiceStack --parameters subscriptionEmail=your@email.here &&
 Remove js and .d.ts files
 ```bash
 npm run clean
+```
+
+To fill tables with test data run
+```bash
+npm run fill:tables
 ```
 
 ## Test
@@ -95,14 +102,25 @@ Deploy in localstack
 ```bash
 cdklocal deploy --require-approval never ProductServiceStack --parameters subscriptionEmail=your@email.here
 ```
+Fill tables with fake data
+```bash
+npm run fill:tables
+```
+
 - ImportServiceStack
 ```bash
 cdklocal deploy --require-approval never ImportServiceStack
 ```
 
+- AuthServiceStack
+```bash
+cdklocal deploy --require-approval never AuthServiceStack 
+```
+
+
 You can deploy with one command, but before running update subscriptionEmail in ./deploy-local.sh file
 ```bash
-npm run local:run 
+npm run local:start
 ```
 
 to stop use

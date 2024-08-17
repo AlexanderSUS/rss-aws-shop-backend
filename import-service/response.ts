@@ -4,22 +4,22 @@ export const headers = {
   'Access-Control-Max-Age': 2592000,
   'Access-Control-Allow-Headers': '*',
   'Content-Type': 'application/json',
-}   
+};   
 
-export function apiSuccessResponse(payload?: Record<string, any>) {
+export function apiSuccessResponse(payload?: Record<string, unknown>) {
   return {
     statusCode: 200,
     headers,
     body: JSON.stringify(payload),
-  }
+  };
 }
 
-export function apiCreateResponse(body: Record<string, any>) {
+export function apiCreateResponse(body: Record<string, unknown>) {
   return {
     statusCode: 201,
     headers,
     body: JSON.stringify(body)
-  }
+  };
 }
 
 export function apiNotFoundError(message = 'Not found') {
@@ -27,7 +27,7 @@ export function apiNotFoundError(message = 'Not found') {
     statusCode: 404,
     headers,
     body: JSON.stringify({ message }),
-  }
+  };
 }
 
 export function apiBadRequestError(message = 'Bad request') {
@@ -35,7 +35,7 @@ export function apiBadRequestError(message = 'Bad request') {
     statusCode: 400,
     headers,
     body: JSON.stringify({ message }),
-  }
+  };
 }
 
 export function apiInternalServerError(message = 'Internal server error') {
@@ -43,6 +43,6 @@ export function apiInternalServerError(message = 'Internal server error') {
     statusCode: 500,
     headers,
     body: JSON.stringify({ message }),
-  }
+  };
 }
 

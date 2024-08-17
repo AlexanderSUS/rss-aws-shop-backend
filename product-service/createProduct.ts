@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { DynamoDBClient, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { apiBadRequestError, apiCreateResponse, apiInternalServerError } from './response';
 import { clientConfig } from './clientConfig';
@@ -9,9 +9,9 @@ import * as Joi from 'joi';
 export const createProductBodySchema = Joi.object({
   title: Joi.string().required(),
   price: Joi.number().positive().integer().required(),
-  description: Joi.string().default(""),
+  description: Joi.string().default(''),
   count: Joi.number().integer().min(0).required(),
-})
+});
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   console.log(event);
@@ -27,10 +27,10 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
 
   const body = JSON.parse(event.body) as CreateProductBody;
 
-  const validationRes = createProductBodySchema.validate(body)
+  const validationRes = createProductBodySchema.validate(body);
 
   if ('error' in validationRes) {
-    return apiBadRequestError(validationRes.error?.message)
+    return apiBadRequestError(validationRes.error?.message);
   }
 
   const { count, title, price, description } = body as CreateProductBody;
@@ -65,8 +65,8 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
   try {
     await client.send(transaction);
   } catch (err) {
-    return apiInternalServerError()
+    return apiInternalServerError();
   }
 
   return apiCreateResponse({ id: productId });
-}
+};

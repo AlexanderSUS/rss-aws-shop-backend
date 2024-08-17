@@ -1,6 +1,6 @@
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { createProductTable } from "./create-product-table"
-import { createStockTable } from "./create-stock-table"
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { createProductTable } from './create-product-table';
+import { createStockTable } from './create-stock-table';
 
 (async () => {
   const client = new DynamoDBClient({
@@ -12,4 +12,4 @@ import { createStockTable } from "./create-stock-table"
   console.log(res1);
   const res2 = await createStockTable(client);
   console.log(res2);
-})()
+})();
